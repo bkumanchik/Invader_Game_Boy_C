@@ -1,0 +1,2291 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12439 (MINGW32)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module main
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _invader_hit
+                                     13 	.globl _turret_hit
+                                     14 	.globl _invader_fire
+                                     15 	.globl _move_anim_inv
+                                     16 	.globl _gotoxy
+                                     17 	.globl _font_set
+                                     18 	.globl _font_load
+                                     19 	.globl _font_init
+                                     20 	.globl _printf
+                                     21 	.globl _set_sprite_data
+                                     22 	.globl _wait_vbl_done
+                                     23 	.globl _joypad
+                                     24 	.globl _game_over
+                                     25 	.globl _lives
+                                     26 	.globl _score
+                                     27 	.globl _blast_delay
+                                     28 	.globl _by
+                                     29 	.globl _bx
+                                     30 	.globl _been_hit
+                                     31 	.globl _inv_fired
+                                     32 	.globl _inv_fire_pause
+                                     33 	.globl _inv_shot_y
+                                     34 	.globl _inv_shot_x
+                                     35 	.globl _i_dir
+                                     36 	.globl _ix_speed
+                                     37 	.globl _inv_frame
+                                     38 	.globl _i_anim_delay
+                                     39 	.globl _invader_y
+                                     40 	.globl _invader_x
+                                     41 	.globl _explosion_play
+                                     42 	.globl _turret_anim_delay
+                                     43 	.globl _turret_exp_frame
+                                     44 	.globl _turret_blast_delay
+                                     45 	.globl _turret_been_hit
+                                     46 	.globl _sy
+                                     47 	.globl _sx
+                                     48 	.globl _shot_fired
+                                     49 	.globl _turret_y
+                                     50 	.globl _turret_x
+                                     51 	.globl _sprites_invader
+                                     52 	.globl _sprites_turret
+                                     53 	.globl _rand_x
+                                     54 ;--------------------------------------------------------
+                                     55 ; special function registers
+                                     56 ;--------------------------------------------------------
+                                     57 ;--------------------------------------------------------
+                                     58 ; ram data
+                                     59 ;--------------------------------------------------------
+                                     60 	.area _DATA
+      000000                         61 _rand_x::
+      000000                         62 	.ds 2
+                                     63 ;--------------------------------------------------------
+                                     64 ; ram data
+                                     65 ;--------------------------------------------------------
+                                     66 	.area _INITIALIZED
+      000000                         67 _sprites_turret::
+      000000                         68 	.ds 256
+      000100                         69 _sprites_invader::
+      000100                         70 	.ds 256
+      000200                         71 _turret_x::
+      000200                         72 	.ds 2
+      000202                         73 _turret_y::
+      000202                         74 	.ds 2
+      000204                         75 _shot_fired::
+      000204                         76 	.ds 1
+      000205                         77 _sx::
+      000205                         78 	.ds 2
+      000207                         79 _sy::
+      000207                         80 	.ds 2
+      000209                         81 _turret_been_hit::
+      000209                         82 	.ds 1
+      00020A                         83 _turret_blast_delay::
+      00020A                         84 	.ds 2
+      00020C                         85 _turret_exp_frame::
+      00020C                         86 	.ds 2
+      00020E                         87 _turret_anim_delay::
+      00020E                         88 	.ds 2
+      000210                         89 _explosion_play::
+      000210                         90 	.ds 1
+      000211                         91 _invader_x::
+      000211                         92 	.ds 2
+      000213                         93 _invader_y::
+      000213                         94 	.ds 2
+      000215                         95 _i_anim_delay::
+      000215                         96 	.ds 2
+      000217                         97 _inv_frame::
+      000217                         98 	.ds 2
+      000219                         99 _ix_speed::
+      000219                        100 	.ds 2
+      00021B                        101 _i_dir::
+      00021B                        102 	.ds 2
+      00021D                        103 _inv_shot_x::
+      00021D                        104 	.ds 2
+      00021F                        105 _inv_shot_y::
+      00021F                        106 	.ds 2
+      000221                        107 _inv_fire_pause::
+      000221                        108 	.ds 2
+      000223                        109 _inv_fired::
+      000223                        110 	.ds 1
+      000224                        111 _been_hit::
+      000224                        112 	.ds 1
+      000225                        113 _bx::
+      000225                        114 	.ds 2
+      000227                        115 _by::
+      000227                        116 	.ds 2
+      000229                        117 _blast_delay::
+      000229                        118 	.ds 2
+      00022B                        119 _score::
+      00022B                        120 	.ds 2
+      00022D                        121 _lives::
+      00022D                        122 	.ds 2
+      00022F                        123 _game_over::
+      00022F                        124 	.ds 1
+                                    125 ;--------------------------------------------------------
+                                    126 ; absolute external ram data
+                                    127 ;--------------------------------------------------------
+                                    128 	.area _DABS (ABS)
+                                    129 ;--------------------------------------------------------
+                                    130 ; global & static initialisations
+                                    131 ;--------------------------------------------------------
+                                    132 	.area _HOME
+                                    133 	.area _GSINIT
+                                    134 	.area _GSFINAL
+                                    135 	.area _GSINIT
+                                    136 ;--------------------------------------------------------
+                                    137 ; Home
+                                    138 ;--------------------------------------------------------
+                                    139 	.area _HOME
+                                    140 	.area _HOME
+                                    141 ;--------------------------------------------------------
+                                    142 ; code
+                                    143 ;--------------------------------------------------------
+                                    144 	.area _CODE
+                                    145 ;main.c:69: void move_anim_inv() { 
+                                    146 ;	---------------------------------
+                                    147 ; Function move_anim_inv
+                                    148 ; ---------------------------------
+      000000                        149 _move_anim_inv::
+                                    150 ;main.c:70: i_anim_delay -=1;
+                                    151 ;setupPair	HL
+                                    152 ;setupPair	HL
+      000000 21r15r02               153 	ld	hl, #_i_anim_delay
+                                    154 ;setupPair	HL
+      000003 2A                     155 	ld	a, (hl+)
+      000004 5F                     156 	ld	e, a
+                                    157 ;setupPair	HL
+      000005 3A                     158 	ld	a, (hl-)
+      000006 57                     159 	ld	d, a
+      000007 1B                     160 	dec	de
+                                    161 ;setupPair	HL
+      000008 7B                     162 	ld	a, e
+      000009 22                     163 	ld	(hl+), a
+      00000A 72                     164 	ld	(hl), d
+                                    165 ;main.c:72: if(i_anim_delay < 0) {
+                                    166 ;setupPair	HL
+      00000B 7E                     167 	ld	a, (hl)
+      00000C CB 7F                  168 	bit	7, a
+      00000E CAr34r01               169 	jp	Z, 00116$
+                                    170 ;main.c:73: i_anim_delay = 20;
+                                    171 ;setupPair	HL
+      000011 2B                     172 	dec	hl
+                                    173 ;setupPair	HL
+      000012 3E 14                  174 	ld	a, #0x14
+      000014 22                     175 	ld	(hl+), a
+      000015 AF                     176 	xor	a, a
+      000016 77                     177 	ld	(hl), a
+                                    178 ;main.c:75: inv_frame += 1;        
+                                    179 ;setupPair	HL
+      000017 21r17r02               180 	ld	hl, #_inv_frame
+      00001A 34                     181 	inc	(hl)
+      00001B 20 02                  182 	jr	NZ, 00195$
+                                    183 ;setupPair	HL
+      00001D 23                     184 	inc	hl
+      00001E 34                     185 	inc	(hl)
+      00001F                        186 00195$:
+                                    187 ;main.c:76: if (inv_frame > 2) {
+                                    188 ;setupPair	HL
+      00001F 21r17r02               189 	ld	hl, #_inv_frame
+      000022 3E 02                  190 	ld	a, #0x02
+      000024 96                     191 	sub	a, (hl)
+      000025 23                     192 	inc	hl
+      000026 3E 00                  193 	ld	a, #0x00
+      000028 9E                     194 	sbc	a, (hl)
+      000029 3E 00                  195 	ld	a, #0x00
+      00002B 57                     196 	ld	d, a
+      00002C CB 7E                  197 	bit	7, (hl)
+      00002E 28 07                  198 	jr	Z, 00196$
+      000030 CB 7A                  199 	bit	7, d
+      000032 20 08                  200 	jr	NZ, 00197$
+      000034 BF                     201 	cp	a, a
+      000035 18 05                  202 	jr	00197$
+      000037                        203 00196$:
+      000037 CB 7A                  204 	bit	7, d
+      000039 28 01                  205 	jr	Z, 00197$
+      00003B 37                     206 	scf
+      00003C                        207 00197$:
+      00003C 30 08                  208 	jr	NC, 00102$
+                                    209 ;main.c:77: inv_frame = 1;
+                                    210 ;setupPair	HL
+      00003E 21r17r02               211 	ld	hl, #_inv_frame
+                                    212 ;setupPair	HL
+      000041 3E 01                  213 	ld	a, #0x01
+      000043 22                     214 	ld	(hl+), a
+      000044 AF                     215 	xor	a, a
+      000045 77                     216 	ld	(hl), a
+      000046                        217 00102$:
+                                    218 ;main.c:80: if(!(been_hit)) {
+                                    219 ;setupPair	HL
+      000046 21r24r02               220 	ld	hl, #_been_hit
+      000049 CB 46                  221 	bit	0, (hl)
+      00004B C2r34r01               222 	jp	NZ, 00116$
+                                    223 ;main.c:82: if ((i_dir == 1) && (invader_x <= 144)) {
+                                    224 ;setupPair	HL
+      00004E 21r1Br02               225 	ld	hl, #_i_dir
+                                    226 ;setupPair	HL
+      000051 2A                     227 	ld	a, (hl+)
+      000052 3D                     228 	dec	a
+      000053 B6                     229 	or	a, (hl)
+      000054 20 5F                  230 	jr	NZ, 00106$
+                                    231 ;setupPair	HL
+      000056 21r11r02               232 	ld	hl, #_invader_x
+      000059 3E 90                  233 	ld	a, #0x90
+      00005B 96                     234 	sub	a, (hl)
+      00005C 23                     235 	inc	hl
+      00005D 3E 00                  236 	ld	a, #0x00
+      00005F 9E                     237 	sbc	a, (hl)
+      000060 3E 00                  238 	ld	a, #0x00
+      000062 57                     239 	ld	d, a
+      000063 CB 7E                  240 	bit	7, (hl)
+      000065 28 07                  241 	jr	Z, 00200$
+      000067 CB 7A                  242 	bit	7, d
+      000069 20 08                  243 	jr	NZ, 00201$
+      00006B BF                     244 	cp	a, a
+      00006C 18 05                  245 	jr	00201$
+      00006E                        246 00200$:
+      00006E CB 7A                  247 	bit	7, d
+      000070 28 01                  248 	jr	Z, 00201$
+      000072 37                     249 	scf
+      000073                        250 00201$:
+      000073 38 40                  251 	jr	C, 00106$
+                                    252 ;main.c:83: invader_x += ix_speed;
+                                    253 ;setupPair	HL
+      000075 FAr11r02               254 	ld	a, (#_invader_x)
+                                    255 ;setupPair	HL
+      000078 21r19r02               256 	ld	hl, #_ix_speed
+      00007B 86                     257 	add	a, (hl)
+                                    258 ;setupPair	HL
+      00007C 21r11r02               259 	ld	hl, #_invader_x
+                                    260 ;setupPair	HL
+      00007F 22                     261 	ld	(hl+), a
+      000080 7E                     262 	ld	a, (hl)
+                                    263 ;setupPair	HL
+      000081 21r1Ar02               264 	ld	hl, #_ix_speed + 1
+      000084 8E                     265 	adc	a, (hl)
+                                    266 ;setupPair	HL
+      000085 21r12r02               267 	ld	hl, #_invader_x + 1
+                                    268 ;main.c:84: if (invader_x >= 144) {                    
+                                    269 ;setupPair	HL
+      000088 32                     270 	ld	(hl-), a
+      000089 2A                     271 	ld	a, (hl+)
+      00008A D6 90                  272 	sub	a, #0x90
+      00008C 7E                     273 	ld	a, (hl)
+      00008D DE 00                  274 	sbc	a, #0x00
+      00008F 56                     275 	ld	d, (hl)
+      000090 3E 00                  276 	ld	a, #0x00
+      000092 CB 7F                  277 	bit	7,a
+      000094 28 07                  278 	jr	Z, 00202$
+      000096 CB 7A                  279 	bit	7, d
+      000098 20 08                  280 	jr	NZ, 00203$
+      00009A BF                     281 	cp	a, a
+      00009B 18 05                  282 	jr	00203$
+      00009D                        283 00202$:
+      00009D CB 7A                  284 	bit	7, d
+      00009F 28 01                  285 	jr	Z, 00203$
+      0000A1 37                     286 	scf
+      0000A2                        287 00203$:
+      0000A2 38 11                  288 	jr	C, 00106$
+                                    289 ;main.c:85: invader_y += 4; // step down
+                                    290 ;setupPair	HL
+      0000A4 21r13r02               291 	ld	hl, #_invader_y
+      0000A7 7E                     292 	ld	a, (hl)
+      0000A8 C6 04                  293 	add	a, #0x04
+                                    294 ;setupPair	HL
+                                    295 ;setupPair	HL
+      0000AA 22                     296 	ld	(hl+), a
+      0000AB 7E                     297 	ld	a, (hl)
+      0000AC CE 00                  298 	adc	a, #0x00
+                                    299 ;setupPair	HL
+      0000AE 77                     300 	ld	(hl), a
+                                    301 ;main.c:86: i_dir = 0;
+      0000AF AF                     302 	xor	a, a
+                                    303 ;setupPair	HL
+      0000B0 21r1Br02               304 	ld	hl, #_i_dir
+                                    305 ;setupPair	HL
+      0000B3 22                     306 	ld	(hl+), a
+      0000B4 77                     307 	ld	(hl), a
+      0000B5                        308 00106$:
+                                    309 ;main.c:90: if ((i_dir < 1) && (invader_x >= 24)) {
+                                    310 ;setupPair	HL
+      0000B5 21r1Br02               311 	ld	hl, #_i_dir
+      0000B8 2A                     312 	ld	a, (hl+)
+      0000B9 D6 01                  313 	sub	a, #0x01
+      0000BB 7E                     314 	ld	a, (hl)
+      0000BC DE 00                  315 	sbc	a, #0x00
+      0000BE 56                     316 	ld	d, (hl)
+      0000BF 3E 00                  317 	ld	a, #0x00
+      0000C1 CB 7F                  318 	bit	7,a
+      0000C3 28 07                  319 	jr	Z, 00204$
+      0000C5 CB 7A                  320 	bit	7, d
+      0000C7 20 08                  321 	jr	NZ, 00205$
+      0000C9 BF                     322 	cp	a, a
+      0000CA 18 05                  323 	jr	00205$
+      0000CC                        324 00204$:
+      0000CC CB 7A                  325 	bit	7, d
+      0000CE 28 01                  326 	jr	Z, 00205$
+      0000D0 37                     327 	scf
+      0000D1                        328 00205$:
+      0000D1 30 61                  329 	jr	NC, 00116$
+                                    330 ;setupPair	HL
+      0000D3 21r11r02               331 	ld	hl, #_invader_x
+      0000D6 2A                     332 	ld	a, (hl+)
+      0000D7 D6 18                  333 	sub	a, #0x18
+      0000D9 7E                     334 	ld	a, (hl)
+      0000DA DE 00                  335 	sbc	a, #0x00
+      0000DC 56                     336 	ld	d, (hl)
+      0000DD 3E 00                  337 	ld	a, #0x00
+      0000DF CB 7F                  338 	bit	7,a
+      0000E1 28 07                  339 	jr	Z, 00206$
+      0000E3 CB 7A                  340 	bit	7, d
+      0000E5 20 08                  341 	jr	NZ, 00207$
+      0000E7 BF                     342 	cp	a, a
+      0000E8 18 05                  343 	jr	00207$
+      0000EA                        344 00206$:
+      0000EA CB 7A                  345 	bit	7, d
+      0000EC 28 01                  346 	jr	Z, 00207$
+      0000EE 37                     347 	scf
+      0000EF                        348 00207$:
+      0000EF 38 43                  349 	jr	C, 00116$
+                                    350 ;main.c:91: invader_x -= ix_speed;
+                                    351 ;setupPair	HL
+      0000F1 FAr11r02               352 	ld	a, (#_invader_x)
+                                    353 ;setupPair	HL
+      0000F4 21r19r02               354 	ld	hl, #_ix_speed
+      0000F7 96                     355 	sub	a, (hl)
+                                    356 ;setupPair	HL
+      0000F8 21r11r02               357 	ld	hl, #_invader_x
+                                    358 ;setupPair	HL
+      0000FB 22                     359 	ld	(hl+), a
+      0000FC 7E                     360 	ld	a, (hl)
+                                    361 ;setupPair	HL
+      0000FD 21r1Ar02               362 	ld	hl, #_ix_speed + 1
+      000100 9E                     363 	sbc	a, (hl)
+                                    364 ;setupPair	HL
+      000101 21r12r02               365 	ld	hl, #_invader_x + 1
+                                    366 ;main.c:92: if (invader_x <= 24) {                    
+                                    367 ;setupPair	HL
+      000104 32                     368 	ld	(hl-), a
+      000105 3E 18                  369 	ld	a, #0x18
+      000107 96                     370 	sub	a, (hl)
+      000108 23                     371 	inc	hl
+      000109 3E 00                  372 	ld	a, #0x00
+      00010B 9E                     373 	sbc	a, (hl)
+      00010C 3E 00                  374 	ld	a, #0x00
+      00010E 57                     375 	ld	d, a
+      00010F CB 7E                  376 	bit	7, (hl)
+      000111 28 07                  377 	jr	Z, 00208$
+      000113 CB 7A                  378 	bit	7, d
+      000115 20 08                  379 	jr	NZ, 00209$
+      000117 BF                     380 	cp	a, a
+      000118 18 05                  381 	jr	00209$
+      00011A                        382 00208$:
+      00011A CB 7A                  383 	bit	7, d
+      00011C 28 01                  384 	jr	Z, 00209$
+      00011E 37                     385 	scf
+      00011F                        386 00209$:
+      00011F 38 13                  387 	jr	C, 00116$
+                                    388 ;main.c:93: invader_y += 4; // step down
+                                    389 ;setupPair	HL
+      000121 21r13r02               390 	ld	hl, #_invader_y
+      000124 7E                     391 	ld	a, (hl)
+      000125 C6 04                  392 	add	a, #0x04
+                                    393 ;setupPair	HL
+                                    394 ;setupPair	HL
+      000127 22                     395 	ld	(hl+), a
+      000128 7E                     396 	ld	a, (hl)
+      000129 CE 00                  397 	adc	a, #0x00
+                                    398 ;setupPair	HL
+      00012B 77                     399 	ld	(hl), a
+                                    400 ;main.c:94: i_dir = 1;           
+                                    401 ;setupPair	HL
+      00012C 21r1Br02               402 	ld	hl, #_i_dir
+                                    403 ;setupPair	HL
+      00012F 3E 01                  404 	ld	a, #0x01
+      000131 22                     405 	ld	(hl+), a
+      000132 AF                     406 	xor	a, a
+      000133 77                     407 	ld	(hl), a
+      000134                        408 00116$:
+                                    409 ;main.c:100: if (!(been_hit)) {
+                                    410 ;setupPair	HL
+      000134 21r24r02               411 	ld	hl, #_been_hit
+      000137 CB 46                  412 	bit	0, (hl)
+      000139 20 29                  413 	jr	NZ, 00123$
+                                    414 ;main.c:101: if(inv_frame == 1) {
+                                    415 ;setupPair	HL
+      00013B 21r17r02               416 	ld	hl, #_inv_frame
+                                    417 ;setupPair	HL
+      00013E 2A                     418 	ld	a, (hl+)
+      00013F 3D                     419 	dec	a
+      000140 B6                     420 	or	a, (hl)
+      000141 20 0C                  421 	jr	NZ, 00120$
+                                    422 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      000143 21r22r00               423 	ld	hl, #(_shadow_OAM + 34)
+      000146 36 10                  424 	ld	(hl), #0x10
+      000148 21r26r00               425 	ld	hl, #(_shadow_OAM + 38)
+      00014B 36 12                  426 	ld	(hl), #0x12
+                                    427 ;main.c:103: set_sprite_tile( 9, 18);             
+      00014D 18 1F                  428 	jr	00124$
+      00014F                        429 00120$:
+                                    430 ;main.c:105: else if(inv_frame == 2) {
+                                    431 ;setupPair	HL
+      00014F 21r17r02               432 	ld	hl, #_inv_frame
+                                    433 ;setupPair	HL
+      000152 2A                     434 	ld	a, (hl+)
+      000153 D6 02                  435 	sub	a, #0x02
+      000155 B6                     436 	or	a, (hl)
+      000156 20 16                  437 	jr	NZ, 00124$
+                                    438 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      000158 21r22r00               439 	ld	hl, #(_shadow_OAM + 34)
+      00015B 36 14                  440 	ld	(hl), #0x14
+      00015D 21r26r00               441 	ld	hl, #(_shadow_OAM + 38)
+      000160 36 16                  442 	ld	(hl), #0x16
+                                    443 ;main.c:107: set_sprite_tile(9, 22);             
+      000162 18 0A                  444 	jr	00124$
+      000164                        445 00123$:
+                                    446 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      000164 21r22r00               447 	ld	hl, #(_shadow_OAM + 34)
+      000167 36 18                  448 	ld	(hl), #0x18
+      000169 21r26r00               449 	ld	hl, #(_shadow_OAM + 38)
+      00016C 36 1A                  450 	ld	(hl), #0x1a
+                                    451 ;main.c:112: set_sprite_tile(9, 26); 
+      00016E                        452 00124$:
+                                    453 ;main.c:115: move_sprite(8, invader_x, invader_y);
+                                    454 ;setupPair	HL
+      00016E 21r13r02               455 	ld	hl, #_invader_y
+      000171 46                     456 	ld	b, (hl)
+                                    457 ;setupPair	HL
+      000172 21r11r02               458 	ld	hl, #_invader_x
+      000175 4E                     459 	ld	c, (hl)
+                                    460 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      000176 21r20r00               461 	ld	hl, #(_shadow_OAM + 32)
+                                    462 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      000179 78                     463 	ld	a, b
+      00017A 22                     464 	ld	(hl+), a
+      00017B 71                     465 	ld	(hl), c
+                                    466 ;main.c:116: move_sprite(9, invader_x + 8, invader_y);
+                                    467 ;setupPair	HL
+      00017C 21r13r02               468 	ld	hl, #_invader_y
+      00017F 46                     469 	ld	b, (hl)
+                                    470 ;setupPair	HL
+      000180 FAr11r02               471 	ld	a, (#_invader_x)
+      000183 C6 08                  472 	add	a, #0x08
+      000185 4F                     473 	ld	c, a
+                                    474 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      000186 21r24r00               475 	ld	hl, #(_shadow_OAM + 36)
+                                    476 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      000189 78                     477 	ld	a, b
+      00018A 22                     478 	ld	(hl+), a
+      00018B 71                     479 	ld	(hl), c
+                                    480 ;main.c:116: move_sprite(9, invader_x + 8, invader_y);
+                                    481 ;main.c:117: }
+      00018C C9                     482 	ret
+                                    483 ;main.c:121: void invader_fire() {    
+                                    484 ;	---------------------------------
+                                    485 ; Function invader_fire
+                                    486 ; ---------------------------------
+      00018D                        487 _invader_fire::
+                                    488 ;main.c:122: inv_fire_pause -= 1;
+                                    489 ;setupPair	HL
+                                    490 ;setupPair	HL
+      00018D 21r21r02               491 	ld	hl, #_inv_fire_pause
+                                    492 ;setupPair	HL
+      000190 2A                     493 	ld	a, (hl+)
+      000191 5F                     494 	ld	e, a
+                                    495 ;setupPair	HL
+      000192 3A                     496 	ld	a, (hl-)
+      000193 57                     497 	ld	d, a
+      000194 1B                     498 	dec	de
+                                    499 ;setupPair	HL
+      000195 7B                     500 	ld	a, e
+      000196 22                     501 	ld	(hl+), a
+      000197 72                     502 	ld	(hl), d
+                                    503 ;main.c:124: if (!(inv_fired)) { // so once invader shot is fired it doesn't follow the invader still
+                                    504 ;setupPair	HL
+      000198 21r23r02               505 	ld	hl, #_inv_fired
+      00019B CB 46                  506 	bit	0, (hl)
+      00019D 20 18                  507 	jr	NZ, 00102$
+                                    508 ;main.c:125: inv_shot_x = invader_x;
+                                    509 ;setupPair	HL
+      00019F FAr11r02               510 	ld	a, (#_invader_x)
+                                    511 ;setupPair	HL
+      0001A2 EAr1Dr02               512 	ld	(#_inv_shot_x),a
+                                    513 ;setupPair	HL
+      0001A5 FAr12r02               514 	ld	a, (#_invader_x + 1)
+                                    515 ;setupPair	HL
+      0001A8 EAr1Er02               516 	ld	(#_inv_shot_x + 1),a
+                                    517 ;main.c:126: inv_shot_y = invader_y;
+                                    518 ;setupPair	HL
+      0001AB FAr13r02               519 	ld	a, (#_invader_y)
+                                    520 ;setupPair	HL
+      0001AE EAr1Fr02               521 	ld	(#_inv_shot_y),a
+                                    522 ;setupPair	HL
+      0001B1 FAr14r02               523 	ld	a, (#_invader_y + 1)
+                                    524 ;setupPair	HL
+      0001B4 EAr20r02               525 	ld	(#_inv_shot_y + 1),a
+      0001B7                        526 00102$:
+                                    527 ;main.c:129: if (inv_fire_pause < 0) {
+                                    528 ;setupPair	HL
+      0001B7 FAr22r02               529 	ld	a, (#_inv_fire_pause + 1)
+      0001BA CB 7F                  530 	bit	7, a
+      0001BC C8                     531 	ret	Z
+                                    532 ;main.c:130: inv_fired = true;
+                                    533 ;setupPair	HL
+      0001BD 21r23r02               534 	ld	hl, #_inv_fired
+      0001C0 36 01                  535 	ld	(hl), #0x01
+                                    536 ;main.c:131: inv_shot_y += 3;            
+                                    537 ;setupPair	HL
+      0001C2 21r1Fr02               538 	ld	hl, #_inv_shot_y
+      0001C5 7E                     539 	ld	a, (hl)
+      0001C6 C6 03                  540 	add	a, #0x03
+                                    541 ;setupPair	HL
+                                    542 ;setupPair	HL
+      0001C8 22                     543 	ld	(hl+), a
+      0001C9 7E                     544 	ld	a, (hl)
+      0001CA CE 00                  545 	adc	a, #0x00
+                                    546 ;setupPair	HL
+      0001CC 77                     547 	ld	(hl), a
+                                    548 ;main.c:133: }    
+      0001CD C9                     549 	ret
+                                    550 ;main.c:137: void turret_hit() {    
+                                    551 ;	---------------------------------
+                                    552 ; Function turret_hit
+                                    553 ; ---------------------------------
+      0001CE                        554 _turret_hit::
+                                    555 ;main.c:138: if (turret_been_hit) {
+                                    556 ;setupPair	HL
+      0001CE 21r09r02               557 	ld	hl, #_turret_been_hit
+      0001D1 CB 46                  558 	bit	0, (hl)
+      0001D3 C8                     559 	ret	Z
+                                    560 ;main.c:144: explosion_play = true;        
+                                    561 ;setupPair	HL
+      0001D4 21r10r02               562 	ld	hl, #_explosion_play
+      0001D7 36 01                  563 	ld	(hl), #0x01
+                                    564 ;main.c:145: turret_anim_delay -= 1;
+                                    565 ;setupPair	HL
+                                    566 ;setupPair	HL
+      0001D9 21r0Er02               567 	ld	hl, #_turret_anim_delay
+                                    568 ;setupPair	HL
+      0001DC 2A                     569 	ld	a, (hl+)
+      0001DD 5F                     570 	ld	e, a
+                                    571 ;setupPair	HL
+      0001DE 3A                     572 	ld	a, (hl-)
+      0001DF 57                     573 	ld	d, a
+      0001E0 1B                     574 	dec	de
+                                    575 ;setupPair	HL
+      0001E1 7B                     576 	ld	a, e
+      0001E2 22                     577 	ld	(hl+), a
+      0001E3 72                     578 	ld	(hl), d
+                                    579 ;main.c:146: turret_blast_delay -= 1;
+                                    580 ;setupPair	HL
+                                    581 ;setupPair	HL
+      0001E4 21r0Ar02               582 	ld	hl, #_turret_blast_delay
+                                    583 ;setupPair	HL
+      0001E7 2A                     584 	ld	a, (hl+)
+      0001E8 5F                     585 	ld	e, a
+                                    586 ;setupPair	HL
+      0001E9 3A                     587 	ld	a, (hl-)
+      0001EA 57                     588 	ld	d, a
+      0001EB 1B                     589 	dec	de
+                                    590 ;setupPair	HL
+      0001EC 7B                     591 	ld	a, e
+      0001ED 22                     592 	ld	(hl+), a
+      0001EE 72                     593 	ld	(hl), d
+                                    594 ;main.c:148: if (turret_anim_delay < 0) {
+                                    595 ;setupPair	HL
+      0001EF FAr0Fr02               596 	ld	a, (#_turret_anim_delay + 1)
+      0001F2 CB 7F                  597 	bit	7, a
+      0001F4 28 37                  598 	jr	Z, 00104$
+                                    599 ;main.c:149: turret_exp_frame += 1;
+                                    600 ;setupPair	HL
+      0001F6 21r0Cr02               601 	ld	hl, #_turret_exp_frame
+      0001F9 34                     602 	inc	(hl)
+      0001FA 20 02                  603 	jr	NZ, 00131$
+                                    604 ;setupPair	HL
+      0001FC 23                     605 	inc	hl
+      0001FD 34                     606 	inc	(hl)
+      0001FE                        607 00131$:
+                                    608 ;main.c:150: if (turret_exp_frame > 2) {
+                                    609 ;setupPair	HL
+      0001FE 21r0Cr02               610 	ld	hl, #_turret_exp_frame
+      000201 3E 02                  611 	ld	a, #0x02
+      000203 96                     612 	sub	a, (hl)
+      000204 23                     613 	inc	hl
+      000205 3E 00                  614 	ld	a, #0x00
+      000207 9E                     615 	sbc	a, (hl)
+      000208 3E 00                  616 	ld	a, #0x00
+      00020A 57                     617 	ld	d, a
+      00020B CB 7E                  618 	bit	7, (hl)
+      00020D 28 07                  619 	jr	Z, 00132$
+      00020F CB 7A                  620 	bit	7, d
+      000211 20 08                  621 	jr	NZ, 00133$
+      000213 BF                     622 	cp	a, a
+      000214 18 05                  623 	jr	00133$
+      000216                        624 00132$:
+      000216 CB 7A                  625 	bit	7, d
+      000218 28 01                  626 	jr	Z, 00133$
+      00021A 37                     627 	scf
+      00021B                        628 00133$:
+      00021B 30 08                  629 	jr	NC, 00102$
+                                    630 ;main.c:151: turret_exp_frame = 1;                
+                                    631 ;setupPair	HL
+      00021D 21r0Cr02               632 	ld	hl, #_turret_exp_frame
+                                    633 ;setupPair	HL
+      000220 3E 01                  634 	ld	a, #0x01
+      000222 22                     635 	ld	(hl+), a
+      000223 AF                     636 	xor	a, a
+      000224 77                     637 	ld	(hl), a
+      000225                        638 00102$:
+                                    639 ;main.c:153: turret_anim_delay = 10;  
+                                    640 ;setupPair	HL
+      000225 21r0Er02               641 	ld	hl, #_turret_anim_delay
+                                    642 ;setupPair	HL
+      000228 3E 0A                  643 	ld	a, #0x0a
+      00022A 22                     644 	ld	(hl+), a
+      00022B AF                     645 	xor	a, a
+      00022C 77                     646 	ld	(hl), a
+      00022D                        647 00104$:
+                                    648 ;main.c:156: if (turret_blast_delay < 0) {
+                                    649 ;setupPair	HL
+      00022D 21r0Br02               650 	ld	hl, #_turret_blast_delay + 1
+      000230 CB 7E                  651 	bit	7, (hl)
+      000232 C8                     652 	ret	Z
+                                    653 ;main.c:157: turret_blast_delay = 60;
+                                    654 ;setupPair	HL
+      000233 2B                     655 	dec	hl
+                                    656 ;setupPair	HL
+      000234 3E 3C                  657 	ld	a, #0x3c
+      000236 22                     658 	ld	(hl+), a
+      000237 AF                     659 	xor	a, a
+      000238 77                     660 	ld	(hl), a
+                                    661 ;main.c:158: turret_been_hit = false;                 
+                                    662 ;setupPair	HL
+      000239 21r09r02               663 	ld	hl, #_turret_been_hit
+      00023C 36 00                  664 	ld	(hl), #0x00
+                                    665 ;main.c:159: explosion_play = false;
+                                    666 ;setupPair	HL
+      00023E 21r10r02               667 	ld	hl, #_explosion_play
+      000241 36 00                  668 	ld	(hl), #0x00
+                                    669 ;main.c:160: turret_x = 84; // reset turret x
+                                    670 ;setupPair	HL
+      000243 21r00r02               671 	ld	hl, #_turret_x
+                                    672 ;setupPair	HL
+      000246 3E 54                  673 	ld	a, #0x54
+      000248 22                     674 	ld	(hl+), a
+      000249 AF                     675 	xor	a, a
+      00024A 77                     676 	ld	(hl), a
+                                    677 ;main.c:161: turret_y = 125; // reset turret y
+                                    678 ;setupPair	HL
+      00024B 21r02r02               679 	ld	hl, #_turret_y
+                                    680 ;setupPair	HL
+      00024E 3E 7D                  681 	ld	a, #0x7d
+      000250 22                     682 	ld	(hl+), a
+      000251 AF                     683 	xor	a, a
+      000252 77                     684 	ld	(hl), a
+                                    685 ;main.c:164: }
+      000253 C9                     686 	ret
+                                    687 ;main.c:168: void invader_hit() {
+                                    688 ;	---------------------------------
+                                    689 ; Function invader_hit
+                                    690 ; ---------------------------------
+      000254                        691 _invader_hit::
+                                    692 ;main.c:169: if (been_hit) {
+                                    693 ;setupPair	HL
+      000254 21r24r02               694 	ld	hl, #_been_hit
+      000257 CB 46                  695 	bit	0, (hl)
+      000259 C8                     696 	ret	Z
+                                    697 ;main.c:175: inv_shot_x = 165; // hide shot
+                                    698 ;setupPair	HL
+      00025A 21r1Dr02               699 	ld	hl, #_inv_shot_x
+                                    700 ;setupPair	HL
+      00025D 3E A5                  701 	ld	a, #0xa5
+      00025F 22                     702 	ld	(hl+), a
+      000260 AF                     703 	xor	a, a
+      000261 77                     704 	ld	(hl), a
+                                    705 ;main.c:176: inv_shot_y = 144; // hide shot
+                                    706 ;setupPair	HL
+      000262 21r1Fr02               707 	ld	hl, #_inv_shot_y
+                                    708 ;setupPair	HL
+      000265 3E 90                  709 	ld	a, #0x90
+      000267 22                     710 	ld	(hl+), a
+      000268 AF                     711 	xor	a, a
+      000269 77                     712 	ld	(hl), a
+                                    713 ;main.c:177: inv_fire_pause = 180; // and reset pause
+                                    714 ;setupPair	HL
+      00026A 21r21r02               715 	ld	hl, #_inv_fire_pause
+                                    716 ;setupPair	HL
+      00026D 3E B4                  717 	ld	a, #0xb4
+      00026F 22                     718 	ld	(hl+), a
+      000270 AF                     719 	xor	a, a
+      000271 77                     720 	ld	(hl), a
+                                    721 ;main.c:180: blast_delay -= 1;
+                                    722 ;setupPair	HL
+                                    723 ;setupPair	HL
+      000272 21r29r02               724 	ld	hl, #_blast_delay
+                                    725 ;setupPair	HL
+      000275 2A                     726 	ld	a, (hl+)
+      000276 5F                     727 	ld	e, a
+                                    728 ;setupPair	HL
+      000277 3A                     729 	ld	a, (hl-)
+      000278 57                     730 	ld	d, a
+      000279 1B                     731 	dec	de
+                                    732 ;setupPair	HL
+      00027A 7B                     733 	ld	a, e
+      00027B 22                     734 	ld	(hl+), a
+      00027C 72                     735 	ld	(hl), d
+                                    736 ;main.c:182: if (blast_delay < 0) {
+                                    737 ;setupPair	HL
+      00027D CB 7E                  738 	bit	7, (hl)
+      00027F C8                     739 	ret	Z
+                                    740 ;main.c:183: blast_delay = 60;
+                                    741 ;setupPair	HL
+      000280 2B                     742 	dec	hl
+                                    743 ;setupPair	HL
+      000281 3E 3C                  744 	ld	a, #0x3c
+      000283 22                     745 	ld	(hl+), a
+      000284 AF                     746 	xor	a, a
+      000285 77                     747 	ld	(hl), a
+                                    748 ;main.c:185: been_hit = false;
+                                    749 ;setupPair	HL
+      000286 21r24r02               750 	ld	hl, #_been_hit
+      000289 36 00                  751 	ld	(hl), #0x00
+                                    752 ;main.c:186: bx = 165; // move boom off screen (following invader)
+                                    753 ;setupPair	HL
+      00028B 21r25r02               754 	ld	hl, #_bx
+                                    755 ;setupPair	HL
+      00028E 3E A5                  756 	ld	a, #0xa5
+      000290 22                     757 	ld	(hl+), a
+      000291 AF                     758 	xor	a, a
+      000292 77                     759 	ld	(hl), a
+                                    760 ;main.c:187: by = 144;
+                                    761 ;setupPair	HL
+      000293 21r27r02               762 	ld	hl, #_by
+                                    763 ;setupPair	HL
+      000296 3E 90                  764 	ld	a, #0x90
+      000298 22                     765 	ld	(hl+), a
+      000299 AF                     766 	xor	a, a
+      00029A 77                     767 	ld	(hl), a
+                                    768 ;main.c:190: invader_x = 85; // move invader back up after being hit        
+                                    769 ;setupPair	HL
+      00029B 21r11r02               770 	ld	hl, #_invader_x
+                                    771 ;setupPair	HL
+      00029E 3E 55                  772 	ld	a, #0x55
+      0002A0 22                     773 	ld	(hl+), a
+      0002A1 AF                     774 	xor	a, a
+      0002A2 77                     775 	ld	(hl), a
+                                    776 ;main.c:191: invader_y = 40; // move invader back up after being hit
+                                    777 ;setupPair	HL
+      0002A3 21r13r02               778 	ld	hl, #_invader_y
+                                    779 ;setupPair	HL
+      0002A6 3E 28                  780 	ld	a, #0x28
+      0002A8 22                     781 	ld	(hl+), a
+      0002A9 AF                     782 	xor	a, a
+      0002AA 77                     783 	ld	(hl), a
+                                    784 ;main.c:194: }
+      0002AB C9                     785 	ret
+                                    786 ;main.c:199: void main() {
+                                    787 ;	---------------------------------
+                                    788 ; Function main
+                                    789 ; ---------------------------------
+      0002AC                        790 _main::
+      0002AC 3B                     791 	dec	sp
+      0002AD 3B                     792 	dec	sp
+                                    793 ;main.c:202: font_init();
+      0002AE CDr00r00               794 	call	_font_init
+                                    795 ;main.c:203: main_font = font_load(font_min);
+      0002B1 11r00r00               796 	ld	de, #_font_min
+      0002B4 D5                     797 	push	de
+      0002B5 CDr00r00               798 	call	_font_load
+      0002B8 E1                     799 	pop	hl
+                                    800 ;main.c:205: font_set(main_font);
+      0002B9 D5                     801 	push	de
+      0002BA CDr00r00               802 	call	_font_set
+      0002BD E1                     803 	pop	hl
+                                    804 ;main.c:210: SPRITES_8x16;
+      0002BE F0r00                  805 	ldh	a, (_LCDC_REG + 0)
+      0002C0 F6 04                  806 	or	a, #0x04
+      0002C2 E0r00                  807 	ldh	(_LCDC_REG + 0), a
+                                    808 ;main.c:215: set_sprite_data(0, 16, sprites_turret); // starting at zero, push four 8x8 tiles from turret array into sprite data
+      0002C4 11r00r00               809 	ld	de, #_sprites_turret
+      0002C7 D5                     810 	push	de
+      0002C8 3E 10                  811 	ld	a, #0x10
+      0002CA F5                     812 	push	af
+      0002CB 33                     813 	inc	sp
+      0002CC AF                     814 	xor	a, a
+      0002CD F5                     815 	push	af
+      0002CE 33                     816 	inc	sp
+      0002CF CDr00r00               817 	call	_set_sprite_data
+      0002D2 E8 04                  818 	add	sp, #4
+                                    819 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      0002D4 21r02r00               820 	ld	hl, #(_shadow_OAM + 2)
+      0002D7 36 00                  821 	ld	(hl), #0x00
+      0002D9 21r06r00               822 	ld	hl, #(_shadow_OAM + 6)
+      0002DC 36 02                  823 	ld	(hl), #0x02
+      0002DE 21r0Ar00               824 	ld	hl, #(_shadow_OAM + 10)
+      0002E1 36 04                  825 	ld	(hl), #0x04
+      0002E3 21r0Er00               826 	ld	hl, #(_shadow_OAM + 14)
+      0002E6 36 06                  827 	ld	(hl), #0x06
+      0002E8 21r12r00               828 	ld	hl, #(_shadow_OAM + 18)
+      0002EB 36 08                  829 	ld	(hl), #0x08
+      0002ED 21r16r00               830 	ld	hl, #(_shadow_OAM + 22)
+      0002F0 36 0A                  831 	ld	(hl), #0x0a
+      0002F2 21r1Ar00               832 	ld	hl, #(_shadow_OAM + 26)
+      0002F5 36 0C                  833 	ld	(hl), #0x0c
+                                    834 ;main.c:233: set_sprite_data(16, 16, sprites_invader);
+      0002F7 11r00r01               835 	ld	de, #_sprites_invader
+      0002FA D5                     836 	push	de
+      0002FB 3E 10                  837 	ld	a, #0x10
+      0002FD F5                     838 	push	af
+      0002FE 33                     839 	inc	sp
+      0002FF 3E 10                  840 	ld	a, #0x10
+      000301 F5                     841 	push	af
+      000302 33                     842 	inc	sp
+      000303 CDr00r00               843 	call	_set_sprite_data
+      000306 E8 04                  844 	add	sp, #4
+                                    845 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      000308 21r22r00               846 	ld	hl, #(_shadow_OAM + 34)
+      00030B 36 10                  847 	ld	(hl), #0x10
+      00030D 21r26r00               848 	ld	hl, #(_shadow_OAM + 38)
+      000310 36 12                  849 	ld	(hl), #0x12
+      000312 21r2Ar00               850 	ld	hl, #(_shadow_OAM + 42)
+      000315 36 14                  851 	ld	(hl), #0x14
+      000317 21r2Er00               852 	ld	hl, #(_shadow_OAM + 46)
+      00031A 36 16                  853 	ld	(hl), #0x16
+      00031C 21r32r00               854 	ld	hl, #(_shadow_OAM + 50)
+      00031F 36 18                  855 	ld	(hl), #0x18
+      000321 21r36r00               856 	ld	hl, #(_shadow_OAM + 54)
+      000324 36 1A                  857 	ld	(hl), #0x1a
+      000326 21r3Ar00               858 	ld	hl, #(_shadow_OAM + 58)
+      000329 36 1C                  859 	ld	(hl), #0x1c
+                                    860 ;main.c:250: SHOW_SPRITES;
+      00032B F0r00                  861 	ldh	a, (_LCDC_REG + 0)
+      00032D F6 02                  862 	or	a, #0x02
+      00032F E0r00                  863 	ldh	(_LCDC_REG + 0), a
+                                    864 ;main.c:255: while(1) {
+      000331                        865 00151$:
+                                    866 ;main.c:257: joydata = joypad(); // Read once per frame and cache the result
+      000331 CDr00r00               867 	call	_joypad
+      000334 F8 00                  868 	ldhl	sp,	#0
+      000336 7B                     869 	ld	a, e
+      000337 22                     870 	ld	(hl+), a
+      000338 36 00                  871 	ld	(hl), #0x00
+                                    872 ;main.c:260: if(game_over) {
+                                    873 ;setupPair	HL
+      00033A 21r2Fr02               874 	ld	hl, #_game_over
+      00033D CB 46                  875 	bit	0, (hl)
+      00033F CArF7r03               876 	jp	Z, 00104$
+                                    877 ;main.c:262: gotoxy(1, 1);        
+      000342 21 01 01               878 	ld	hl, #0x101
+      000345 E5                     879 	push	hl
+      000346 CDr00r00               880 	call	_gotoxy
+      000349 E1                     881 	pop	hl
+                                    882 ;main.c:263: printf("SCORE %d ", score);
+                                    883 ;setupPair	HL
+      00034A 21r2Br02               884 	ld	hl, #_score
+                                    885 ;setupPair	HL
+      00034D 2A                     886 	ld	a, (hl+)
+      00034E 5F                     887 	ld	e, a
+      00034F 56                     888 	ld	d, (hl)
+      000350 D5                     889 	push	de
+      000351 11r34r07               890 	ld	de, #___str_0
+      000354 D5                     891 	push	de
+      000355 CDr00r00               892 	call	_printf
+      000358 E8 04                  893 	add	sp, #4
+                                    894 ;main.c:264: gotoxy(12, 1);
+      00035A 21 0C 01               895 	ld	hl, #0x10c
+      00035D E5                     896 	push	hl
+      00035E CDr00r00               897 	call	_gotoxy
+      000361 E1                     898 	pop	hl
+                                    899 ;main.c:265: printf("LIVES %d ", lives);
+                                    900 ;setupPair	HL
+      000362 21r2Dr02               901 	ld	hl, #_lives
+                                    902 ;setupPair	HL
+      000365 2A                     903 	ld	a, (hl+)
+      000366 5F                     904 	ld	e, a
+      000367 56                     905 	ld	d, (hl)
+      000368 D5                     906 	push	de
+      000369 11r3Er07               907 	ld	de, #___str_1
+      00036C D5                     908 	push	de
+      00036D CDr00r00               909 	call	_printf
+      000370 E8 04                  910 	add	sp, #4
+                                    911 ;main.c:266: gotoxy(5, 8);
+      000372 21 05 08               912 	ld	hl, #0x805
+      000375 E5                     913 	push	hl
+      000376 CDr00r00               914 	call	_gotoxy
+      000379 E1                     915 	pop	hl
+                                    916 ;main.c:267: printf("GAME  OVER");
+      00037A 11r48r07               917 	ld	de, #___str_2
+      00037D D5                     918 	push	de
+      00037E CDr00r00               919 	call	_printf
+      000381 C1                     920 	pop	bc
+                                    921 ;main.c:272: if(joydata & J_START) {                    
+      000382 E5                     922 	push	hl
+      000383 F8 02                  923 	ldhl	sp,	#2
+      000385 CB 7E                  924 	bit	7, (hl)
+      000387 E1                     925 	pop	hl
+      000388 28 6D                  926 	jr	Z, 00104$
+                                    927 ;main.c:273: turret_x = 84;  // turret starting x
+                                    928 ;setupPair	HL
+      00038A 21r00r02               929 	ld	hl, #_turret_x
+                                    930 ;setupPair	HL
+      00038D 3E 54                  931 	ld	a, #0x54
+      00038F 22                     932 	ld	(hl+), a
+      000390 AF                     933 	xor	a, a
+      000391 77                     934 	ld	(hl), a
+                                    935 ;main.c:274: turret_y = 125; // turret starting y
+                                    936 ;setupPair	HL
+      000392 21r02r02               937 	ld	hl, #_turret_y
+                                    938 ;setupPair	HL
+      000395 3E 7D                  939 	ld	a, #0x7d
+      000397 22                     940 	ld	(hl+), a
+      000398 AF                     941 	xor	a, a
+      000399 77                     942 	ld	(hl), a
+                                    943 ;main.c:275: invader_x = 85; // invader starting x
+                                    944 ;setupPair	HL
+      00039A 21r11r02               945 	ld	hl, #_invader_x
+                                    946 ;setupPair	HL
+      00039D 3E 55                  947 	ld	a, #0x55
+      00039F 22                     948 	ld	(hl+), a
+      0003A0 AF                     949 	xor	a, a
+      0003A1 77                     950 	ld	(hl), a
+                                    951 ;main.c:276: invader_y = 40; // invader starting y
+                                    952 ;setupPair	HL
+      0003A2 21r13r02               953 	ld	hl, #_invader_y
+                                    954 ;setupPair	HL
+      0003A5 3E 28                  955 	ld	a, #0x28
+      0003A7 22                     956 	ld	(hl+), a
+      0003A8 AF                     957 	xor	a, a
+      0003A9 77                     958 	ld	(hl), a
+                                    959 ;main.c:277: i_dir = 1;      // 1 = right, 0 = left
+                                    960 ;setupPair	HL
+      0003AA 21r1Br02               961 	ld	hl, #_i_dir
+                                    962 ;setupPair	HL
+      0003AD 3E 01                  963 	ld	a, #0x01
+      0003AF 22                     964 	ld	(hl+), a
+      0003B0 AF                     965 	xor	a, a
+      0003B1 77                     966 	ld	(hl), a
+                                    967 ;main.c:278: lives = 3; // reset lives
+                                    968 ;setupPair	HL
+      0003B2 21r2Dr02               969 	ld	hl, #_lives
+                                    970 ;setupPair	HL
+      0003B5 3E 03                  971 	ld	a, #0x03
+      0003B7 22                     972 	ld	(hl+), a
+      0003B8 AF                     973 	xor	a, a
+      0003B9 77                     974 	ld	(hl), a
+                                    975 ;main.c:279: score = 0; // reset score
+      0003BA AF                     976 	xor	a, a
+                                    977 ;setupPair	HL
+      0003BB 21r2Br02               978 	ld	hl, #_score
+                                    979 ;setupPair	HL
+      0003BE 22                     980 	ld	(hl+), a
+      0003BF 77                     981 	ld	(hl), a
+                                    982 ;main.c:280: explosion_play = false; 
+                                    983 ;setupPair	HL
+      0003C0 21r10r02               984 	ld	hl, #_explosion_play
+      0003C3 36 00                  985 	ld	(hl), #0x00
+                                    986 ;main.c:281: turret_been_hit = false;  
+                                    987 ;setupPair	HL
+      0003C5 21r09r02               988 	ld	hl, #_turret_been_hit
+      0003C8 36 00                  989 	ld	(hl), #0x00
+                                    990 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      0003CA 21r20r00               991 	ld	hl, #(_shadow_OAM + 32)
+                                    992 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      0003CD 3E 28                  993 	ld	a, #0x28
+      0003CF 22                     994 	ld	(hl+), a
+      0003D0 36 55                  995 	ld	(hl), #0x55
+                                    996 ;main.c:283: move_sprite(9, invader_x + 8, invader_y);             
+                                    997 ;setupPair	HL
+      0003D2 21r13r02               998 	ld	hl, #_invader_y
+      0003D5 46                     999 	ld	b, (hl)
+                                   1000 ;setupPair	HL
+      0003D6 FAr11r02              1001 	ld	a, (#_invader_x)
+      0003D9 C6 08                 1002 	add	a, #0x08
+      0003DB 4F                    1003 	ld	c, a
+                                   1004 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      0003DC 21r24r00              1005 	ld	hl, #(_shadow_OAM + 36)
+                                   1006 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      0003DF 78                    1007 	ld	a, b
+      0003E0 22                    1008 	ld	(hl+), a
+      0003E1 71                    1009 	ld	(hl), c
+                                   1010 ;main.c:284: game_over = false; 
+                                   1011 ;setupPair	HL
+      0003E2 21r2Fr02              1012 	ld	hl, #_game_over
+      0003E5 36 00                 1013 	ld	(hl), #0x00
+                                   1014 ;main.c:285: gotoxy(5, 8);
+      0003E7 21 05 08              1015 	ld	hl, #0x805
+      0003EA E5                    1016 	push	hl
+      0003EB CDr00r00              1017 	call	_gotoxy
+      0003EE E1                    1018 	pop	hl
+                                   1019 ;main.c:286: printf("          "); // removes "GAME OVER" text                                                             
+      0003EF 11r53r07              1020 	ld	de, #___str_3
+      0003F2 D5                    1021 	push	de
+      0003F3 CDr00r00              1022 	call	_printf
+      0003F6 E1                    1023 	pop	hl
+      0003F7                       1024 00104$:
+                                   1025 ;main.c:292: if(!(game_over)) {         
+                                   1026 ;setupPair	HL
+      0003F7 21r2Fr02              1027 	ld	hl, #_game_over
+      0003FA CB 46                 1028 	bit	0, (hl)
+      0003FC C2r31r03              1029 	jp	NZ, 00151$
+                                   1030 ;main.c:294: move_anim_inv(); 
+      0003FF CDr00r00              1031 	call	_move_anim_inv
+                                   1032 ;main.c:297: invader_fire();      
+      000402 CDr8Dr01              1033 	call	_invader_fire
+                                   1034 ;main.c:300: invader_hit(); 
+      000405 CDr54r02              1035 	call	_invader_hit
+                                   1036 ;main.c:303: turret_hit();
+      000408 CDrCEr01              1037 	call	_turret_hit
+                                   1038 ;main.c:307: joydata = joypad(); // Read once per frame and cache the result
+      00040B CDr00r00              1039 	call	_joypad
+      00040E 4B                    1040 	ld	c, e
+                                   1041 ;main.c:309: if(joydata & J_RIGHT && (!(turret_been_hit))) {            
+      00040F CB 41                 1042 	bit	0, c
+      000411 28 2D                 1043 	jr	Z, 00108$
+                                   1044 ;setupPair	HL
+      000413 21r09r02              1045 	ld	hl, #_turret_been_hit
+      000416 CB 46                 1046 	bit	0, (hl)
+      000418 20 26                 1047 	jr	NZ, 00108$
+                                   1048 ;main.c:310: if(turret_x < 142) {
+                                   1049 ;setupPair	HL
+      00041A 21r00r02              1050 	ld	hl, #_turret_x
+      00041D 2A                    1051 	ld	a, (hl+)
+      00041E D6 8E                 1052 	sub	a, #0x8e
+      000420 7E                    1053 	ld	a, (hl)
+      000421 DE 00                 1054 	sbc	a, #0x00
+      000423 56                    1055 	ld	d, (hl)
+      000424 3E 00                 1056 	ld	a, #0x00
+      000426 CB 7F                 1057 	bit	7,a
+      000428 28 07                 1058 	jr	Z, 00324$
+      00042A CB 7A                 1059 	bit	7, d
+      00042C 20 08                 1060 	jr	NZ, 00325$
+      00042E BF                    1061 	cp	a, a
+      00042F 18 05                 1062 	jr	00325$
+      000431                       1063 00324$:
+      000431 CB 7A                 1064 	bit	7, d
+      000433 28 01                 1065 	jr	Z, 00325$
+      000435 37                    1066 	scf
+      000436                       1067 00325$:
+      000436 30 08                 1068 	jr	NC, 00108$
+                                   1069 ;main.c:311: turret_x += 1; 
+                                   1070 ;setupPair	HL
+      000438 21r00r02              1071 	ld	hl, #_turret_x
+      00043B 34                    1072 	inc	(hl)
+      00043C 20 02                 1073 	jr	NZ, 00326$
+                                   1074 ;setupPair	HL
+      00043E 23                    1075 	inc	hl
+      00043F 34                    1076 	inc	(hl)
+      000440                       1077 00326$:
+      000440                       1078 00108$:
+                                   1079 ;main.c:315: if(joydata & J_LEFT && (!(turret_been_hit))) {            
+      000440 CB 49                 1080 	bit	1, c
+      000442 28 31                 1081 	jr	Z, 00113$
+                                   1082 ;setupPair	HL
+      000444 21r09r02              1083 	ld	hl, #_turret_been_hit
+      000447 CB 46                 1084 	bit	0, (hl)
+      000449 20 2A                 1085 	jr	NZ, 00113$
+                                   1086 ;main.c:316: if(turret_x > 21) {
+                                   1087 ;setupPair	HL
+      00044B 21r00r02              1088 	ld	hl, #_turret_x
+      00044E 3E 15                 1089 	ld	a, #0x15
+      000450 96                    1090 	sub	a, (hl)
+      000451 23                    1091 	inc	hl
+      000452 3E 00                 1092 	ld	a, #0x00
+      000454 9E                    1093 	sbc	a, (hl)
+      000455 3E 00                 1094 	ld	a, #0x00
+      000457 57                    1095 	ld	d, a
+      000458 CB 7E                 1096 	bit	7, (hl)
+      00045A 28 07                 1097 	jr	Z, 00328$
+      00045C CB 7A                 1098 	bit	7, d
+      00045E 20 08                 1099 	jr	NZ, 00329$
+      000460 BF                    1100 	cp	a, a
+      000461 18 05                 1101 	jr	00329$
+      000463                       1102 00328$:
+      000463 CB 7A                 1103 	bit	7, d
+      000465 28 01                 1104 	jr	Z, 00329$
+      000467 37                    1105 	scf
+      000468                       1106 00329$:
+      000468 30 0B                 1107 	jr	NC, 00113$
+                                   1108 ;main.c:317: turret_x -= 1; 
+                                   1109 ;setupPair	HL
+                                   1110 ;setupPair	HL
+      00046A 21r00r02              1111 	ld	hl, #_turret_x
+                                   1112 ;setupPair	HL
+      00046D 2A                    1113 	ld	a, (hl+)
+      00046E 5F                    1114 	ld	e, a
+                                   1115 ;setupPair	HL
+      00046F 3A                    1116 	ld	a, (hl-)
+      000470 57                    1117 	ld	d, a
+      000471 1B                    1118 	dec	de
+                                   1119 ;setupPair	HL
+      000472 7B                    1120 	ld	a, e
+      000473 22                    1121 	ld	(hl+), a
+      000474 72                    1122 	ld	(hl), d
+      000475                       1123 00113$:
+                                   1124 ;main.c:321: if(joydata & J_A && !(shot_fired) && (!(turret_been_hit))) {    
+      000475 CB 61                 1125 	bit	4, c
+      000477 28 2F                 1126 	jr	Z, 00116$
+                                   1127 ;setupPair	HL
+      000479 21r04r02              1128 	ld	hl, #_shot_fired
+      00047C CB 46                 1129 	bit	0, (hl)
+      00047E 20 28                 1130 	jr	NZ, 00116$
+                                   1131 ;setupPair	HL
+      000480 21r09r02              1132 	ld	hl, #_turret_been_hit
+      000483 CB 46                 1133 	bit	0, (hl)
+      000485 20 21                 1134 	jr	NZ, 00116$
+                                   1135 ;main.c:324: shot_fired = true;               
+                                   1136 ;setupPair	HL
+      000487 21r04r02              1137 	ld	hl, #_shot_fired
+      00048A 36 01                 1138 	ld	(hl), #0x01
+                                   1139 ;main.c:325: sx=turret_x;
+                                   1140 ;setupPair	HL
+      00048C FAr00r02              1141 	ld	a, (#_turret_x)
+                                   1142 ;setupPair	HL
+      00048F EAr05r02              1143 	ld	(#_sx),a
+                                   1144 ;setupPair	HL
+      000492 FAr01r02              1145 	ld	a, (#_turret_x + 1)
+                                   1146 ;setupPair	HL
+      000495 EAr06r02              1147 	ld	(#_sx + 1),a
+                                   1148 ;main.c:326: sy=turret_y + 6;
+                                   1149 ;setupPair	HL
+      000498 FAr02r02              1150 	ld	a, (#_turret_y)
+      00049B C6 06                 1151 	add	a, #0x06
+                                   1152 ;setupPair	HL
+      00049D EAr07r02              1153 	ld	(#_sy),a
+                                   1154 ;setupPair	HL
+      0004A0 FAr03r02              1155 	ld	a, (#_turret_y + 1)
+      0004A3 CE 00                 1156 	adc	a, #0x00
+                                   1157 ;setupPair	HL
+      0004A5 EAr08r02              1158 	ld	(#_sy + 1),a
+      0004A8                       1159 00116$:
+                                   1160 ;main.c:331: if (shot_fired) {
+                                   1161 ;setupPair	HL
+      0004A8 21r04r02              1162 	ld	hl, #_shot_fired
+      0004AB CB 46                 1163 	bit	0, (hl)
+      0004AD 28 39                 1164 	jr	Z, 00122$
+                                   1165 ;main.c:332: sy -= 3; 
+                                   1166 ;setupPair	HL
+      0004AF 21r07r02              1167 	ld	hl, #_sy
+      0004B2 7E                    1168 	ld	a, (hl)
+      0004B3 C6 FD                 1169 	add	a, #0xfd
+                                   1170 ;setupPair	HL
+                                   1171 ;setupPair	HL
+      0004B5 22                    1172 	ld	(hl+), a
+      0004B6 7E                    1173 	ld	a, (hl)
+      0004B7 CE FF                 1174 	adc	a, #0xff
+                                   1175 ;setupPair	HL
+                                   1176 ;main.c:333: if (sy < 41) {
+                                   1177 ;setupPair	HL
+      0004B9 32                    1178 	ld	(hl-), a
+      0004BA 2A                    1179 	ld	a, (hl+)
+      0004BB D6 29                 1180 	sub	a, #0x29
+      0004BD 7E                    1181 	ld	a, (hl)
+      0004BE DE 00                 1182 	sbc	a, #0x00
+      0004C0 56                    1183 	ld	d, (hl)
+      0004C1 3E 00                 1184 	ld	a, #0x00
+      0004C3 CB 7F                 1185 	bit	7,a
+      0004C5 28 07                 1186 	jr	Z, 00331$
+      0004C7 CB 7A                 1187 	bit	7, d
+      0004C9 20 08                 1188 	jr	NZ, 00332$
+      0004CB BF                    1189 	cp	a, a
+      0004CC 18 05                 1190 	jr	00332$
+      0004CE                       1191 00331$:
+      0004CE CB 7A                 1192 	bit	7, d
+      0004D0 28 01                 1193 	jr	Z, 00332$
+      0004D2 37                    1194 	scf
+      0004D3                       1195 00332$:
+      0004D3 30 13                 1196 	jr	NC, 00122$
+                                   1197 ;main.c:334: shot_fired = false;
+                                   1198 ;setupPair	HL
+      0004D5 21r04r02              1199 	ld	hl, #_shot_fired
+      0004D8 36 00                 1200 	ld	(hl), #0x00
+                                   1201 ;main.c:335: sx = 165;
+                                   1202 ;setupPair	HL
+      0004DA 21r05r02              1203 	ld	hl, #_sx
+                                   1204 ;setupPair	HL
+      0004DD 3E A5                 1205 	ld	a, #0xa5
+      0004DF 22                    1206 	ld	(hl+), a
+      0004E0 AF                    1207 	xor	a, a
+      0004E1 77                    1208 	ld	(hl), a
+                                   1209 ;main.c:336: sy = 0;
+      0004E2 AF                    1210 	xor	a, a
+                                   1211 ;setupPair	HL
+      0004E3 21r07r02              1212 	ld	hl, #_sy
+                                   1213 ;setupPair	HL
+      0004E6 22                    1214 	ld	(hl+), a
+      0004E7 77                    1215 	ld	(hl), a
+      0004E8                       1216 00122$:
+                                   1217 ;main.c:343: ) {
+                                   1218 ;setupPair	HL
+      0004E8 21r1Fr02              1219 	ld	hl, #_inv_shot_y
+      0004EB 3E 83                 1220 	ld	a, #0x83
+      0004ED 96                    1221 	sub	a, (hl)
+      0004EE 23                    1222 	inc	hl
+      0004EF 3E 00                 1223 	ld	a, #0x00
+      0004F1 9E                    1224 	sbc	a, (hl)
+      0004F2 3E 00                 1225 	ld	a, #0x00
+      0004F4 57                    1226 	ld	d, a
+      0004F5 CB 7E                 1227 	bit	7, (hl)
+      0004F7 28 07                 1228 	jr	Z, 00333$
+      0004F9 CB 7A                 1229 	bit	7, d
+      0004FB 20 08                 1230 	jr	NZ, 00334$
+      0004FD BF                    1231 	cp	a, a
+      0004FE 18 05                 1232 	jr	00334$
+      000500                       1233 00333$:
+      000500 CB 7A                 1234 	bit	7, d
+      000502 28 01                 1235 	jr	Z, 00334$
+      000504 37                    1236 	scf
+      000505                       1237 00334$:
+      000505 30 25                 1238 	jr	NC, 00124$
+                                   1239 ;main.c:344: inv_fired = false;
+                                   1240 ;setupPair	HL
+      000507 21r23r02              1241 	ld	hl, #_inv_fired
+      00050A 36 00                 1242 	ld	(hl), #0x00
+                                   1243 ;main.c:345: inv_shot_x = invader_x;
+                                   1244 ;setupPair	HL
+      00050C FAr11r02              1245 	ld	a, (#_invader_x)
+                                   1246 ;setupPair	HL
+      00050F EAr1Dr02              1247 	ld	(#_inv_shot_x),a
+                                   1248 ;setupPair	HL
+      000512 FAr12r02              1249 	ld	a, (#_invader_x + 1)
+                                   1250 ;setupPair	HL
+      000515 EAr1Er02              1251 	ld	(#_inv_shot_x + 1),a
+                                   1252 ;main.c:346: inv_shot_y = invader_y;
+                                   1253 ;setupPair	HL
+      000518 FAr13r02              1254 	ld	a, (#_invader_y)
+                                   1255 ;setupPair	HL
+      00051B EAr1Fr02              1256 	ld	(#_inv_shot_y),a
+                                   1257 ;setupPair	HL
+      00051E FAr14r02              1258 	ld	a, (#_invader_y + 1)
+                                   1259 ;setupPair	HL
+      000521 EAr20r02              1260 	ld	(#_inv_shot_y + 1),a
+                                   1261 ;main.c:347: inv_fire_pause = 90;
+                                   1262 ;setupPair	HL
+      000524 21r21r02              1263 	ld	hl, #_inv_fire_pause
+                                   1264 ;setupPair	HL
+      000527 3E 5A                 1265 	ld	a, #0x5a
+      000529 22                    1266 	ld	(hl+), a
+      00052A AF                    1267 	xor	a, a
+      00052B 77                    1268 	ld	(hl), a
+      00052C                       1269 00124$:
+                                   1270 ;main.c:352: if ((sx + 6 >= invader_x) && (sx + 6 <= invader_x + 10) && (sy + 4 <= invader_y + 8)) {
+                                   1271 ;setupPair	HL
+      00052C 21r05r02              1272 	ld	hl, #_sx
+                                   1273 ;setupPair	HL
+      00052F 2A                    1274 	ld	a, (hl+)
+      000530 C6 06                 1275 	add	a, #0x06
+      000532 4F                    1276 	ld	c, a
+      000533 7E                    1277 	ld	a, (hl)
+      000534 CE 00                 1278 	adc	a, #0x00
+      000536 47                    1279 	ld	b, a
+                                   1280 ;setupPair	HL
+      000537 21r11r02              1281 	ld	hl, #_invader_x
+      00053A 79                    1282 	ld	a, c
+      00053B 96                    1283 	sub	a, (hl)
+      00053C 23                    1284 	inc	hl
+      00053D 78                    1285 	ld	a, b
+      00053E 9E                    1286 	sbc	a, (hl)
+      00053F 78                    1287 	ld	a, b
+      000540 57                    1288 	ld	d, a
+      000541 CB 7E                 1289 	bit	7, (hl)
+      000543 28 07                 1290 	jr	Z, 00335$
+      000545 CB 7A                 1291 	bit	7, d
+      000547 20 08                 1292 	jr	NZ, 00336$
+      000549 BF                    1293 	cp	a, a
+      00054A 18 05                 1294 	jr	00336$
+      00054C                       1295 00335$:
+      00054C CB 7A                 1296 	bit	7, d
+      00054E 28 01                 1297 	jr	Z, 00336$
+      000550 37                    1298 	scf
+      000551                       1299 00336$:
+      000551 38 77                 1300 	jr	C, 00126$
+                                   1301 ;setupPair	HL
+                                   1302 ;setupPair	HL
+      000553 21r11r02              1303 	ld	hl, #_invader_x
+                                   1304 ;setupPair	HL
+      000556 2A                    1305 	ld	a, (hl+)
+      000557 5F                    1306 	ld	e, a
+      000558 56                    1307 	ld	d, (hl)
+      000559 21 0A 00              1308 	ld	hl, #0x000a
+      00055C 19                    1309 	add	hl, de
+      00055D 33                    1310 	inc	sp
+      00055E 33                    1311 	inc	sp
+      00055F E5                    1312 	push	hl
+      000560 F8 00                 1313 	ldhl	sp,	#0
+      000562 2A                    1314 	ld	a, (hl+)
+      000563 91                    1315 	sub	a, c
+      000564 7E                    1316 	ld	a, (hl)
+      000565 98                    1317 	sbc	a, b
+      000566 56                    1318 	ld	d, (hl)
+      000567 78                    1319 	ld	a, b
+      000568 CB 7F                 1320 	bit	7,a
+      00056A 28 07                 1321 	jr	Z, 00337$
+      00056C CB 7A                 1322 	bit	7, d
+      00056E 20 08                 1323 	jr	NZ, 00338$
+      000570 BF                    1324 	cp	a, a
+      000571 18 05                 1325 	jr	00338$
+      000573                       1326 00337$:
+      000573 CB 7A                 1327 	bit	7, d
+      000575 28 01                 1328 	jr	Z, 00338$
+      000577 37                    1329 	scf
+      000578                       1330 00338$:
+      000578 38 50                 1331 	jr	C, 00126$
+                                   1332 ;setupPair	HL
+      00057A 21r07r02              1333 	ld	hl, #_sy
+                                   1334 ;setupPair	HL
+      00057D 2A                    1335 	ld	a, (hl+)
+      00057E C6 04                 1336 	add	a, #0x04
+      000580 4F                    1337 	ld	c, a
+      000581 7E                    1338 	ld	a, (hl)
+      000582 CE 00                 1339 	adc	a, #0x00
+      000584 47                    1340 	ld	b, a
+                                   1341 ;setupPair	HL
+                                   1342 ;setupPair	HL
+      000585 21r13r02              1343 	ld	hl, #_invader_y
+                                   1344 ;setupPair	HL
+      000588 2A                    1345 	ld	a, (hl+)
+      000589 5F                    1346 	ld	e, a
+      00058A 56                    1347 	ld	d, (hl)
+      00058B 21 08 00              1348 	ld	hl, #0x0008
+      00058E 19                    1349 	add	hl, de
+      00058F 33                    1350 	inc	sp
+      000590 33                    1351 	inc	sp
+      000591 E5                    1352 	push	hl
+      000592 F8 00                 1353 	ldhl	sp,	#0
+      000594 2A                    1354 	ld	a, (hl+)
+      000595 91                    1355 	sub	a, c
+      000596 7E                    1356 	ld	a, (hl)
+      000597 98                    1357 	sbc	a, b
+      000598 56                    1358 	ld	d, (hl)
+      000599 78                    1359 	ld	a, b
+      00059A CB 7F                 1360 	bit	7,a
+      00059C 28 07                 1361 	jr	Z, 00339$
+      00059E CB 7A                 1362 	bit	7, d
+      0005A0 20 08                 1363 	jr	NZ, 00340$
+      0005A2 BF                    1364 	cp	a, a
+      0005A3 18 05                 1365 	jr	00340$
+      0005A5                       1366 00339$:
+      0005A5 CB 7A                 1367 	bit	7, d
+      0005A7 28 01                 1368 	jr	Z, 00340$
+      0005A9 37                    1369 	scf
+      0005AA                       1370 00340$:
+      0005AA 38 1E                 1371 	jr	C, 00126$
+                                   1372 ;main.c:353: sx = 165;
+                                   1373 ;setupPair	HL
+      0005AC 21r05r02              1374 	ld	hl, #_sx
+                                   1375 ;setupPair	HL
+      0005AF 3E A5                 1376 	ld	a, #0xa5
+      0005B1 22                    1377 	ld	(hl+), a
+      0005B2 AF                    1378 	xor	a, a
+      0005B3 77                    1379 	ld	(hl), a
+                                   1380 ;main.c:354: sy = 0;
+      0005B4 AF                    1381 	xor	a, a
+                                   1382 ;setupPair	HL
+      0005B5 21r07r02              1383 	ld	hl, #_sy
+                                   1384 ;setupPair	HL
+      0005B8 22                    1385 	ld	(hl+), a
+      0005B9 77                    1386 	ld	(hl), a
+                                   1387 ;main.c:355: been_hit = true;
+                                   1388 ;setupPair	HL
+      0005BA 21r24r02              1389 	ld	hl, #_been_hit
+      0005BD 36 01                 1390 	ld	(hl), #0x01
+                                   1391 ;main.c:356: score += 10; 
+                                   1392 ;setupPair	HL
+      0005BF 21r2Br02              1393 	ld	hl, #_score
+      0005C2 7E                    1394 	ld	a, (hl)
+      0005C3 C6 0A                 1395 	add	a, #0x0a
+                                   1396 ;setupPair	HL
+                                   1397 ;setupPair	HL
+      0005C5 22                    1398 	ld	(hl+), a
+      0005C6 7E                    1399 	ld	a, (hl)
+      0005C7 CE 00                 1400 	adc	a, #0x00
+                                   1401 ;setupPair	HL
+      0005C9 77                    1402 	ld	(hl), a
+      0005CA                       1403 00126$:
+                                   1404 ;main.c:361: if ((inv_shot_x + 6) >= (turret_x) && (inv_shot_x + 4) <= (turret_x + 12) && (inv_shot_y + 6) >= (turret_y + 9)) {
+                                   1405 ;setupPair	HL
+      0005CA 21r1Dr02              1406 	ld	hl, #_inv_shot_x
+                                   1407 ;setupPair	HL
+      0005CD 2A                    1408 	ld	a, (hl+)
+      0005CE C6 06                 1409 	add	a, #0x06
+      0005D0 4F                    1410 	ld	c, a
+      0005D1 7E                    1411 	ld	a, (hl)
+      0005D2 CE 00                 1412 	adc	a, #0x00
+      0005D4 47                    1413 	ld	b, a
+                                   1414 ;setupPair	HL
+      0005D5 21r00r02              1415 	ld	hl, #_turret_x
+      0005D8 79                    1416 	ld	a, c
+      0005D9 96                    1417 	sub	a, (hl)
+      0005DA 23                    1418 	inc	hl
+      0005DB 78                    1419 	ld	a, b
+      0005DC 9E                    1420 	sbc	a, (hl)
+      0005DD 78                    1421 	ld	a, b
+      0005DE 57                    1422 	ld	d, a
+      0005DF CB 7E                 1423 	bit	7, (hl)
+      0005E1 28 07                 1424 	jr	Z, 00341$
+      0005E3 CB 7A                 1425 	bit	7, d
+      0005E5 20 08                 1426 	jr	NZ, 00342$
+      0005E7 BF                    1427 	cp	a, a
+      0005E8 18 05                 1428 	jr	00342$
+      0005EA                       1429 00341$:
+      0005EA CB 7A                 1430 	bit	7, d
+      0005EC 28 01                 1431 	jr	Z, 00342$
+      0005EE 37                    1432 	scf
+      0005EF                       1433 00342$:
+      0005EF DAr76r06              1434 	jp	C, 00134$
+                                   1435 ;setupPair	HL
+      0005F2 21r1Dr02              1436 	ld	hl, #_inv_shot_x
+                                   1437 ;setupPair	HL
+      0005F5 2A                    1438 	ld	a, (hl+)
+      0005F6 C6 04                 1439 	add	a, #0x04
+      0005F8 4F                    1440 	ld	c, a
+      0005F9 7E                    1441 	ld	a, (hl)
+      0005FA CE 00                 1442 	adc	a, #0x00
+      0005FC 47                    1443 	ld	b, a
+                                   1444 ;setupPair	HL
+                                   1445 ;setupPair	HL
+      0005FD 21r00r02              1446 	ld	hl, #_turret_x
+                                   1447 ;setupPair	HL
+      000600 2A                    1448 	ld	a, (hl+)
+      000601 5F                    1449 	ld	e, a
+      000602 56                    1450 	ld	d, (hl)
+      000603 21 0C 00              1451 	ld	hl, #0x000c
+      000606 19                    1452 	add	hl, de
+      000607 33                    1453 	inc	sp
+      000608 33                    1454 	inc	sp
+      000609 E5                    1455 	push	hl
+      00060A F8 00                 1456 	ldhl	sp,	#0
+      00060C 2A                    1457 	ld	a, (hl+)
+      00060D 91                    1458 	sub	a, c
+      00060E 7E                    1459 	ld	a, (hl)
+      00060F 98                    1460 	sbc	a, b
+      000610 56                    1461 	ld	d, (hl)
+      000611 78                    1462 	ld	a, b
+      000612 CB 7F                 1463 	bit	7,a
+      000614 28 07                 1464 	jr	Z, 00343$
+      000616 CB 7A                 1465 	bit	7, d
+      000618 20 08                 1466 	jr	NZ, 00344$
+      00061A BF                    1467 	cp	a, a
+      00061B 18 05                 1468 	jr	00344$
+      00061D                       1469 00343$:
+      00061D CB 7A                 1470 	bit	7, d
+      00061F 28 01                 1471 	jr	Z, 00344$
+      000621 37                    1472 	scf
+      000622                       1473 00344$:
+      000622 38 52                 1474 	jr	C, 00134$
+                                   1475 ;setupPair	HL
+                                   1476 ;setupPair	HL
+      000624 21r1Fr02              1477 	ld	hl, #_inv_shot_y
+                                   1478 ;setupPair	HL
+      000627 2A                    1479 	ld	a, (hl+)
+      000628 5F                    1480 	ld	e, a
+      000629 56                    1481 	ld	d, (hl)
+      00062A 21 06 00              1482 	ld	hl, #0x0006
+      00062D 19                    1483 	add	hl, de
+      00062E 33                    1484 	inc	sp
+      00062F 33                    1485 	inc	sp
+      000630 E5                    1486 	push	hl
+                                   1487 ;setupPair	HL
+      000631 21r02r02              1488 	ld	hl, #_turret_y
+                                   1489 ;setupPair	HL
+      000634 2A                    1490 	ld	a, (hl+)
+      000635 C6 09                 1491 	add	a, #0x09
+      000637 4F                    1492 	ld	c, a
+      000638 7E                    1493 	ld	a, (hl)
+      000639 CE 00                 1494 	adc	a, #0x00
+      00063B 47                    1495 	ld	b, a
+      00063C F8 00                 1496 	ldhl	sp,	#0
+      00063E 2A                    1497 	ld	a, (hl+)
+      00063F 91                    1498 	sub	a, c
+      000640 7E                    1499 	ld	a, (hl)
+      000641 98                    1500 	sbc	a, b
+      000642 56                    1501 	ld	d, (hl)
+      000643 78                    1502 	ld	a, b
+      000644 CB 7F                 1503 	bit	7,a
+      000646 28 07                 1504 	jr	Z, 00345$
+      000648 CB 7A                 1505 	bit	7, d
+      00064A 20 08                 1506 	jr	NZ, 00346$
+      00064C BF                    1507 	cp	a, a
+      00064D 18 05                 1508 	jr	00346$
+      00064F                       1509 00345$:
+      00064F CB 7A                 1510 	bit	7, d
+      000651 28 01                 1511 	jr	Z, 00346$
+      000653 37                    1512 	scf
+      000654                       1513 00346$:
+      000654 38 20                 1514 	jr	C, 00134$
+                                   1515 ;main.c:362: if (!(turret_been_hit)) {
+                                   1516 ;setupPair	HL
+      000656 21r09r02              1517 	ld	hl, #_turret_been_hit
+      000659 CB 46                 1518 	bit	0, (hl)
+      00065B 20 19                 1519 	jr	NZ, 00134$
+                                   1520 ;main.c:363: lives -= 1;
+                                   1521 ;setupPair	HL
+                                   1522 ;setupPair	HL
+      00065D 21r2Dr02              1523 	ld	hl, #_lives
+                                   1524 ;setupPair	HL
+      000660 2A                    1525 	ld	a, (hl+)
+      000661 5F                    1526 	ld	e, a
+                                   1527 ;setupPair	HL
+      000662 3A                    1528 	ld	a, (hl-)
+      000663 57                    1529 	ld	d, a
+      000664 1B                    1530 	dec	de
+                                   1531 ;setupPair	HL
+      000665 7B                    1532 	ld	a, e
+      000666 22                    1533 	ld	(hl+), a
+      000667 72                    1534 	ld	(hl), d
+                                   1535 ;main.c:365: if (lives == 0) {                    
+                                   1536 ;setupPair	HL
+                                   1537 ;setupPair	HL
+      000668 3A                    1538 	ld	a, (hl-)
+      000669 B6                    1539 	or	a, (hl)
+      00066A 20 05                 1540 	jr	NZ, 00130$
+                                   1541 ;main.c:366: game_over = true;                                                  
+                                   1542 ;setupPair	HL
+      00066C 21r2Fr02              1543 	ld	hl, #_game_over
+      00066F 36 01                 1544 	ld	(hl), #0x01
+      000671                       1545 00130$:
+                                   1546 ;main.c:368: turret_been_hit = true;            
+                                   1547 ;setupPair	HL
+      000671 21r09r02              1548 	ld	hl, #_turret_been_hit
+      000674 36 01                 1549 	ld	(hl), #0x01
+      000676                       1550 00134$:
+                                   1551 ;main.c:375: if (inv_fired) {
+                                   1552 ;setupPair	HL
+      000676 21r23r02              1553 	ld	hl, #_inv_fired
+      000679 CB 46                 1554 	bit	0, (hl)
+      00067B 28 10                 1555 	jr	Z, 00138$
+                                   1556 ;main.c:377: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
+                                   1557 ;setupPair	HL
+      00067D 21r1Fr02              1558 	ld	hl, #_inv_shot_y
+      000680 46                    1559 	ld	b, (hl)
+                                   1560 ;setupPair	HL
+      000681 21r1Dr02              1561 	ld	hl, #_inv_shot_x
+      000684 4E                    1562 	ld	c, (hl)
+                                   1563 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      000685 21r38r00              1564 	ld	hl, #(_shadow_OAM + 56)
+                                   1565 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      000688 78                    1566 	ld	a, b
+      000689 22                    1567 	ld	(hl+), a
+      00068A 71                    1568 	ld	(hl), c
+                                   1569 ;main.c:377: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
+      00068B 18 08                 1570 	jr	00139$
+      00068D                       1571 00138$:
+                                   1572 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      00068D 21r38r00              1573 	ld	hl, #(_shadow_OAM + 56)
+                                   1574 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      000690 36 90                 1575 	ld	(hl), #0x90
+      000692 23                    1576 	inc	hl
+      000693 36 A5                 1577 	ld	(hl), #0xa5
+                                   1578 ;main.c:381: move_sprite(14, 165, 144);                  // draw sprite 14 to these coordinates                 
+      000695                       1579 00139$:
+                                   1580 ;main.c:385: if (!(turret_been_hit)) {
+                                   1581 ;setupPair	HL
+      000695 21r09r02              1582 	ld	hl, #_turret_been_hit
+      000698 CB 46                 1583 	bit	0, (hl)
+      00069A 20 0C                 1584 	jr	NZ, 00146$
+                                   1585 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      00069C 21r02r00              1586 	ld	hl, #(_shadow_OAM + 2)
+      00069F 36 00                 1587 	ld	(hl), #0x00
+      0006A1 21r06r00              1588 	ld	hl, #(_shadow_OAM + 6)
+      0006A4 36 02                 1589 	ld	(hl), #0x02
+                                   1590 ;main.c:387: set_sprite_tile(1, 2);            
+      0006A6 18 27                 1591 	jr	00147$
+      0006A8                       1592 00146$:
+                                   1593 ;main.c:392: if (turret_exp_frame == 1) {               
+                                   1594 ;setupPair	HL
+      0006A8 21r0Cr02              1595 	ld	hl, #_turret_exp_frame
+                                   1596 ;setupPair	HL
+      0006AB 2A                    1597 	ld	a, (hl+)
+      0006AC 3D                    1598 	dec	a
+      0006AD B6                    1599 	or	a, (hl)
+      0006AE 20 0C                 1600 	jr	NZ, 00143$
+                                   1601 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      0006B0 21r02r00              1602 	ld	hl, #(_shadow_OAM + 2)
+      0006B3 36 04                 1603 	ld	(hl), #0x04
+      0006B5 21r06r00              1604 	ld	hl, #(_shadow_OAM + 6)
+      0006B8 36 06                 1605 	ld	(hl), #0x06
+                                   1606 ;main.c:394: set_sprite_tile(1, 6); 
+      0006BA 18 13                 1607 	jr	00147$
+      0006BC                       1608 00143$:
+                                   1609 ;main.c:397: else if (turret_exp_frame == 2) {                
+                                   1610 ;setupPair	HL
+      0006BC 21r0Cr02              1611 	ld	hl, #_turret_exp_frame
+                                   1612 ;setupPair	HL
+      0006BF 2A                    1613 	ld	a, (hl+)
+      0006C0 D6 02                 1614 	sub	a, #0x02
+      0006C2 B6                    1615 	or	a, (hl)
+      0006C3 20 0A                 1616 	jr	NZ, 00147$
+                                   1617 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
+      0006C5 21r02r00              1618 	ld	hl, #(_shadow_OAM + 2)
+      0006C8 36 08                 1619 	ld	(hl), #0x08
+      0006CA 21r06r00              1620 	ld	hl, #(_shadow_OAM + 6)
+      0006CD 36 0A                 1621 	ld	(hl), #0x0a
+                                   1622 ;main.c:399: set_sprite_tile(1, 10); 
+      0006CF                       1623 00147$:
+                                   1624 ;main.c:402: move_sprite(0, turret_x, turret_y);     // draw sprite 0 to these coordinates
+                                   1625 ;setupPair	HL
+      0006CF 21r02r02              1626 	ld	hl, #_turret_y
+      0006D2 4E                    1627 	ld	c, (hl)
+                                   1628 ;setupPair	HL
+      0006D3 21r00r02              1629 	ld	hl, #_turret_x
+      0006D6 46                    1630 	ld	b, (hl)
+                                   1631 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      0006D7 21r00r00              1632 	ld	hl, #_shadow_OAM
+                                   1633 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      0006DA 79                    1634 	ld	a, c
+      0006DB 22                    1635 	ld	(hl+), a
+      0006DC 70                    1636 	ld	(hl), b
+                                   1637 ;main.c:403: move_sprite(1, turret_x + 8, turret_y); // draw sprite 1 to these coordinates
+                                   1638 ;setupPair	HL
+      0006DD 21r02r02              1639 	ld	hl, #_turret_y
+      0006E0 4E                    1640 	ld	c, (hl)
+                                   1641 ;setupPair	HL
+      0006E1 FAr00r02              1642 	ld	a, (#_turret_x)
+      0006E4 C6 08                 1643 	add	a, #0x08
+      0006E6 47                    1644 	ld	b, a
+                                   1645 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      0006E7 21r04r00              1646 	ld	hl, #(_shadow_OAM + 4)
+                                   1647 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      0006EA 79                    1648 	ld	a, c
+      0006EB 22                    1649 	ld	(hl+), a
+      0006EC 70                    1650 	ld	(hl), b
+                                   1651 ;main.c:406: move_sprite(6, sx, sy); // draw sprite 6 to these coordinates
+                                   1652 ;setupPair	HL
+      0006ED 21r07r02              1653 	ld	hl, #_sy
+      0006F0 4E                    1654 	ld	c, (hl)
+                                   1655 ;setupPair	HL
+      0006F1 21r05r02              1656 	ld	hl, #_sx
+      0006F4 46                    1657 	ld	b, (hl)
+                                   1658 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
+      0006F5 21r18r00              1659 	ld	hl, #(_shadow_OAM + 24)
+                                   1660 ;c:/gbdk/include/gb/gb.h:1248: itm->y=y, itm->x=x;
+      0006F8 79                    1661 	ld	a, c
+      0006F9 22                    1662 	ld	(hl+), a
+      0006FA 70                    1663 	ld	(hl), b
+                                   1664 ;main.c:410: gotoxy(1, 1);        
+      0006FB 21 01 01              1665 	ld	hl, #0x101
+      0006FE E5                    1666 	push	hl
+      0006FF CDr00r00              1667 	call	_gotoxy
+      000702 E1                    1668 	pop	hl
+                                   1669 ;main.c:411: printf("SCORE %d ", score);
+                                   1670 ;setupPair	HL
+      000703 21r2Br02              1671 	ld	hl, #_score
+                                   1672 ;setupPair	HL
+      000706 2A                    1673 	ld	a, (hl+)
+      000707 5F                    1674 	ld	e, a
+      000708 56                    1675 	ld	d, (hl)
+      000709 D5                    1676 	push	de
+      00070A 11r34r07              1677 	ld	de, #___str_0
+      00070D D5                    1678 	push	de
+      00070E CDr00r00              1679 	call	_printf
+      000711 E8 04                 1680 	add	sp, #4
+                                   1681 ;main.c:412: gotoxy(12, 1);
+      000713 21 0C 01              1682 	ld	hl, #0x10c
+      000716 E5                    1683 	push	hl
+      000717 CDr00r00              1684 	call	_gotoxy
+      00071A E1                    1685 	pop	hl
+                                   1686 ;main.c:413: printf("LIVES %d ", lives);
+                                   1687 ;setupPair	HL
+      00071B 21r2Dr02              1688 	ld	hl, #_lives
+                                   1689 ;setupPair	HL
+      00071E 2A                    1690 	ld	a, (hl+)
+      00071F 5F                    1691 	ld	e, a
+      000720 56                    1692 	ld	d, (hl)
+      000721 D5                    1693 	push	de
+      000722 11r3Er07              1694 	ld	de, #___str_1
+      000725 D5                    1695 	push	de
+      000726 CDr00r00              1696 	call	_printf
+      000729 E8 04                 1697 	add	sp, #4
+                                   1698 ;main.c:418: wait_vbl_done(); // helps keep framerate
+      00072B CDr00r00              1699 	call	_wait_vbl_done
+      00072E C3r31r03              1700 	jp	00151$
+                                   1701 ;main.c:421: }
+      000731 33                    1702 	inc	sp
+      000732 33                    1703 	inc	sp
+      000733 C9                    1704 	ret
+      000734                       1705 ___str_0:
+      000734 53 43 4F 52 45 20 25  1706 	.ascii "SCORE %d "
+             64 20
+      00073D 00                    1707 	.db 0x00
+      00073E                       1708 ___str_1:
+      00073E 4C 49 56 45 53 20 25  1709 	.ascii "LIVES %d "
+             64 20
+      000747 00                    1710 	.db 0x00
+      000748                       1711 ___str_2:
+      000748 47 41 4D 45 20 20 4F  1712 	.ascii "GAME  OVER"
+             56 45 52
+      000752 00                    1713 	.db 0x00
+      000753                       1714 ___str_3:
+      000753 20 20 20 20 20 20 20  1715 	.ascii "          "
+             20 20 20
+      00075D 00                    1716 	.db 0x00
+                                   1717 	.area _CODE
+                                   1718 	.area _INITIALIZER
+      000000                       1719 __xinit__sprites_turret:
+      000000 00                    1720 	.db #0x00	; 0
+      000001 00                    1721 	.db #0x00	; 0
+      000002 00                    1722 	.db #0x00	; 0
+      000003 00                    1723 	.db #0x00	; 0
+      000004 00                    1724 	.db #0x00	; 0
+      000005 00                    1725 	.db #0x00	; 0
+      000006 00                    1726 	.db #0x00	; 0
+      000007 00                    1727 	.db #0x00	; 0
+      000008 00                    1728 	.db #0x00	; 0
+      000009 00                    1729 	.db #0x00	; 0
+      00000A 00                    1730 	.db #0x00	; 0
+      00000B 00                    1731 	.db #0x00	; 0
+      00000C 00                    1732 	.db #0x00	; 0
+      00000D 00                    1733 	.db #0x00	; 0
+      00000E 00                    1734 	.db #0x00	; 0
+      00000F 00                    1735 	.db #0x00	; 0
+      000010 02                    1736 	.db #0x02	; 2
+      000011 02                    1737 	.db #0x02	; 2
+      000012 07                    1738 	.db #0x07	; 7
+      000013 07                    1739 	.db #0x07	; 7
+      000014 07                    1740 	.db #0x07	; 7
+      000015 07                    1741 	.db #0x07	; 7
+      000016 7F                    1742 	.db #0x7f	; 127
+      000017 7F                    1743 	.db #0x7f	; 127
+      000018 FF                    1744 	.db #0xff	; 255
+      000019 FF                    1745 	.db #0xff	; 255
+      00001A FF                    1746 	.db #0xff	; 255
+      00001B FF                    1747 	.db #0xff	; 255
+      00001C FF                    1748 	.db #0xff	; 255
+      00001D FF                    1749 	.db #0xff	; 255
+      00001E FF                    1750 	.db #0xff	; 255
+      00001F FF                    1751 	.db #0xff	; 255
+      000020 00                    1752 	.db #0x00	; 0
+      000021 00                    1753 	.db #0x00	; 0
+      000022 00                    1754 	.db #0x00	; 0
+      000023 00                    1755 	.db #0x00	; 0
+      000024 00                    1756 	.db #0x00	; 0
+      000025 00                    1757 	.db #0x00	; 0
+      000026 00                    1758 	.db #0x00	; 0
+      000027 00                    1759 	.db #0x00	; 0
+      000028 00                    1760 	.db #0x00	; 0
+      000029 00                    1761 	.db #0x00	; 0
+      00002A 00                    1762 	.db #0x00	; 0
+      00002B 00                    1763 	.db #0x00	; 0
+      00002C 00                    1764 	.db #0x00	; 0
+      00002D 00                    1765 	.db #0x00	; 0
+      00002E 00                    1766 	.db #0x00	; 0
+      00002F 00                    1767 	.db #0x00	; 0
+      000030 00                    1768 	.db #0x00	; 0
+      000031 00                    1769 	.db #0x00	; 0
+      000032 00                    1770 	.db #0x00	; 0
+      000033 00                    1771 	.db #0x00	; 0
+      000034 00                    1772 	.db #0x00	; 0
+      000035 00                    1773 	.db #0x00	; 0
+      000036 F0                    1774 	.db #0xf0	; 240
+      000037 F0                    1775 	.db #0xf0	; 240
+      000038 F8                    1776 	.db #0xf8	; 248
+      000039 F8                    1777 	.db #0xf8	; 248
+      00003A F8                    1778 	.db #0xf8	; 248
+      00003B F8                    1779 	.db #0xf8	; 248
+      00003C F8                    1780 	.db #0xf8	; 248
+      00003D F8                    1781 	.db #0xf8	; 248
+      00003E F8                    1782 	.db #0xf8	; 248
+      00003F F8                    1783 	.db #0xf8	; 248
+      000040 00                    1784 	.db #0x00	; 0
+      000041 00                    1785 	.db #0x00	; 0
+      000042 00                    1786 	.db #0x00	; 0
+      000043 00                    1787 	.db #0x00	; 0
+      000044 00                    1788 	.db #0x00	; 0
+      000045 00                    1789 	.db #0x00	; 0
+      000046 00                    1790 	.db #0x00	; 0
+      000047 00                    1791 	.db #0x00	; 0
+      000048 00                    1792 	.db #0x00	; 0
+      000049 00                    1793 	.db #0x00	; 0
+      00004A 00                    1794 	.db #0x00	; 0
+      00004B 00                    1795 	.db #0x00	; 0
+      00004C 00                    1796 	.db #0x00	; 0
+      00004D 00                    1797 	.db #0x00	; 0
+      00004E 00                    1798 	.db #0x00	; 0
+      00004F 00                    1799 	.db #0x00	; 0
+      000050 04                    1800 	.db #0x04	; 4
+      000051 04                    1801 	.db #0x04	; 4
+      000052 00                    1802 	.db #0x00	; 0
+      000053 00                    1803 	.db #0x00	; 0
+      000054 05                    1804 	.db #0x05	; 5
+      000055 05                    1805 	.db #0x05	; 5
+      000056 24                    1806 	.db #0x24	; 36
+      000057 24                    1807 	.db #0x24	; 36
+      000058 03                    1808 	.db #0x03	; 3
+      000059 03                    1809 	.db #0x03	; 3
+      00005A 8B                    1810 	.db #0x8b	; 139
+      00005B 8B                    1811 	.db #0x8b	; 139
+      00005C 3F                    1812 	.db #0x3f	; 63
+      00005D 3F                    1813 	.db #0x3f	; 63
+      00005E 7F                    1814 	.db #0x7f	; 127
+      00005F 7F                    1815 	.db #0x7f	; 127
+      000060 00                    1816 	.db #0x00	; 0
+      000061 00                    1817 	.db #0x00	; 0
+      000062 00                    1818 	.db #0x00	; 0
+      000063 00                    1819 	.db #0x00	; 0
+      000064 00                    1820 	.db #0x00	; 0
+      000065 00                    1821 	.db #0x00	; 0
+      000066 00                    1822 	.db #0x00	; 0
+      000067 00                    1823 	.db #0x00	; 0
+      000068 00                    1824 	.db #0x00	; 0
+      000069 00                    1825 	.db #0x00	; 0
+      00006A 00                    1826 	.db #0x00	; 0
+      00006B 00                    1827 	.db #0x00	; 0
+      00006C 00                    1828 	.db #0x00	; 0
+      00006D 00                    1829 	.db #0x00	; 0
+      00006E 00                    1830 	.db #0x00	; 0
+      00006F 00                    1831 	.db #0x00	; 0
+      000070 00                    1832 	.db #0x00	; 0
+      000071 00                    1833 	.db #0x00	; 0
+      000072 20                    1834 	.db #0x20	; 32
+      000073 20                    1835 	.db #0x20	; 32
+      000074 40                    1836 	.db #0x40	; 64
+      000075 40                    1837 	.db #0x40	; 64
+      000076 00                    1838 	.db #0x00	; 0
+      000077 00                    1839 	.db #0x00	; 0
+      000078 60                    1840 	.db #0x60	; 96
+      000079 60                    1841 	.db #0x60	; 96
+      00007A 50                    1842 	.db #0x50	; 80	'P'
+      00007B 50                    1843 	.db #0x50	; 80	'P'
+      00007C C8                    1844 	.db #0xc8	; 200
+      00007D C8                    1845 	.db #0xc8	; 200
+      00007E EA                    1846 	.db #0xea	; 234
+      00007F EA                    1847 	.db #0xea	; 234
+      000080 00                    1848 	.db #0x00	; 0
+      000081 00                    1849 	.db #0x00	; 0
+      000082 00                    1850 	.db #0x00	; 0
+      000083 00                    1851 	.db #0x00	; 0
+      000084 00                    1852 	.db #0x00	; 0
+      000085 00                    1853 	.db #0x00	; 0
+      000086 00                    1854 	.db #0x00	; 0
+      000087 00                    1855 	.db #0x00	; 0
+      000088 00                    1856 	.db #0x00	; 0
+      000089 00                    1857 	.db #0x00	; 0
+      00008A 00                    1858 	.db #0x00	; 0
+      00008B 00                    1859 	.db #0x00	; 0
+      00008C 00                    1860 	.db #0x00	; 0
+      00008D 00                    1861 	.db #0x00	; 0
+      00008E 00                    1862 	.db #0x00	; 0
+      00008F 00                    1863 	.db #0x00	; 0
+      000090 20                    1864 	.db #0x20	; 32
+      000091 20                    1865 	.db #0x20	; 32
+      000092 84                    1866 	.db #0x84	; 132
+      000093 84                    1867 	.db #0x84	; 132
+      000094 21                    1868 	.db #0x21	; 33
+      000095 21                    1869 	.db #0x21	; 33
+      000096 04                    1870 	.db #0x04	; 4
+      000097 04                    1871 	.db #0x04	; 4
+      000098 56                    1872 	.db #0x56	; 86	'V'
+      000099 56                    1873 	.db #0x56	; 86	'V'
+      00009A 23                    1874 	.db #0x23	; 35
+      00009B 23                    1875 	.db #0x23	; 35
+      00009C 1F                    1876 	.db #0x1f	; 31
+      00009D 1F                    1877 	.db #0x1f	; 31
+      00009E 37                    1878 	.db #0x37	; 55	'7'
+      00009F 37                    1879 	.db #0x37	; 55	'7'
+      0000A0 00                    1880 	.db #0x00	; 0
+      0000A1 00                    1881 	.db #0x00	; 0
+      0000A2 00                    1882 	.db #0x00	; 0
+      0000A3 00                    1883 	.db #0x00	; 0
+      0000A4 00                    1884 	.db #0x00	; 0
+      0000A5 00                    1885 	.db #0x00	; 0
+      0000A6 00                    1886 	.db #0x00	; 0
+      0000A7 00                    1887 	.db #0x00	; 0
+      0000A8 00                    1888 	.db #0x00	; 0
+      0000A9 00                    1889 	.db #0x00	; 0
+      0000AA 00                    1890 	.db #0x00	; 0
+      0000AB 00                    1891 	.db #0x00	; 0
+      0000AC 00                    1892 	.db #0x00	; 0
+      0000AD 00                    1893 	.db #0x00	; 0
+      0000AE 00                    1894 	.db #0x00	; 0
+      0000AF 00                    1895 	.db #0x00	; 0
+      0000B0 08                    1896 	.db #0x08	; 8
+      0000B1 08                    1897 	.db #0x08	; 8
+      0000B2 32                    1898 	.db #0x32	; 50	'2'
+      0000B3 32                    1899 	.db #0x32	; 50	'2'
+      0000B4 80                    1900 	.db #0x80	; 128
+      0000B5 80                    1901 	.db #0x80	; 128
+      0000B6 04                    1902 	.db #0x04	; 4
+      0000B7 04                    1903 	.db #0x04	; 4
+      0000B8 E2                    1904 	.db #0xe2	; 226
+      0000B9 E2                    1905 	.db #0xe2	; 226
+      0000BA 88                    1906 	.db #0x88	; 136
+      0000BB 88                    1907 	.db #0x88	; 136
+      0000BC E0                    1908 	.db #0xe0	; 224
+      0000BD E0                    1909 	.db #0xe0	; 224
+      0000BE E4                    1910 	.db #0xe4	; 228
+      0000BF E4                    1911 	.db #0xe4	; 228
+      0000C0 00                    1912 	.db #0x00	; 0
+      0000C1 00                    1913 	.db #0x00	; 0
+      0000C2 00                    1914 	.db #0x00	; 0
+      0000C3 00                    1915 	.db #0x00	; 0
+      0000C4 00                    1916 	.db #0x00	; 0
+      0000C5 00                    1917 	.db #0x00	; 0
+      0000C6 00                    1918 	.db #0x00	; 0
+      0000C7 00                    1919 	.db #0x00	; 0
+      0000C8 02                    1920 	.db #0x02	; 2
+      0000C9 02                    1921 	.db #0x02	; 2
+      0000CA 02                    1922 	.db #0x02	; 2
+      0000CB 02                    1923 	.db #0x02	; 2
+      0000CC 02                    1924 	.db #0x02	; 2
+      0000CD 02                    1925 	.db #0x02	; 2
+      0000CE 00                    1926 	.db #0x00	; 0
+      0000CF 00                    1927 	.db #0x00	; 0
+      0000D0 00                    1928 	.db #0x00	; 0
+      0000D1 00                    1929 	.db #0x00	; 0
+      0000D2 00                    1930 	.db #0x00	; 0
+      0000D3 00                    1931 	.db #0x00	; 0
+      0000D4 00                    1932 	.db #0x00	; 0
+      0000D5 00                    1933 	.db #0x00	; 0
+      0000D6 00                    1934 	.db #0x00	; 0
+      0000D7 00                    1935 	.db #0x00	; 0
+      0000D8 00                    1936 	.db #0x00	; 0
+      0000D9 00                    1937 	.db #0x00	; 0
+      0000DA 00                    1938 	.db #0x00	; 0
+      0000DB 00                    1939 	.db #0x00	; 0
+      0000DC 00                    1940 	.db #0x00	; 0
+      0000DD 00                    1941 	.db #0x00	; 0
+      0000DE 00                    1942 	.db #0x00	; 0
+      0000DF 00                    1943 	.db #0x00	; 0
+      0000E0 00                    1944 	.db #0x00	; 0
+      0000E1 00                    1945 	.db #0x00	; 0
+      0000E2 00                    1946 	.db #0x00	; 0
+      0000E3 00                    1947 	.db #0x00	; 0
+      0000E4 00                    1948 	.db #0x00	; 0
+      0000E5 00                    1949 	.db #0x00	; 0
+      0000E6 00                    1950 	.db #0x00	; 0
+      0000E7 00                    1951 	.db #0x00	; 0
+      0000E8 00                    1952 	.db #0x00	; 0
+      0000E9 00                    1953 	.db #0x00	; 0
+      0000EA 00                    1954 	.db #0x00	; 0
+      0000EB 00                    1955 	.db #0x00	; 0
+      0000EC 00                    1956 	.db #0x00	; 0
+      0000ED 00                    1957 	.db #0x00	; 0
+      0000EE 00                    1958 	.db #0x00	; 0
+      0000EF 00                    1959 	.db #0x00	; 0
+      0000F0 00                    1960 	.db #0x00	; 0
+      0000F1 00                    1961 	.db #0x00	; 0
+      0000F2 00                    1962 	.db #0x00	; 0
+      0000F3 00                    1963 	.db #0x00	; 0
+      0000F4 00                    1964 	.db #0x00	; 0
+      0000F5 00                    1965 	.db #0x00	; 0
+      0000F6 00                    1966 	.db #0x00	; 0
+      0000F7 00                    1967 	.db #0x00	; 0
+      0000F8 00                    1968 	.db #0x00	; 0
+      0000F9 00                    1969 	.db #0x00	; 0
+      0000FA 00                    1970 	.db #0x00	; 0
+      0000FB 00                    1971 	.db #0x00	; 0
+      0000FC 00                    1972 	.db #0x00	; 0
+      0000FD 00                    1973 	.db #0x00	; 0
+      0000FE 00                    1974 	.db #0x00	; 0
+      0000FF 00                    1975 	.db #0x00	; 0
+      000100                       1976 __xinit__sprites_invader:
+      000100 20                    1977 	.db #0x20	; 32
+      000101 20                    1978 	.db #0x20	; 32
+      000102 11                    1979 	.db #0x11	; 17
+      000103 11                    1980 	.db #0x11	; 17
+      000104 3F                    1981 	.db #0x3f	; 63
+      000105 3F                    1982 	.db #0x3f	; 63
+      000106 6E                    1983 	.db #0x6e	; 110	'n'
+      000107 6E                    1984 	.db #0x6e	; 110	'n'
+      000108 FF                    1985 	.db #0xff	; 255
+      000109 FF                    1986 	.db #0xff	; 255
+      00010A FF                    1987 	.db #0xff	; 255
+      00010B FF                    1988 	.db #0xff	; 255
+      00010C BF                    1989 	.db #0xbf	; 191
+      00010D BF                    1990 	.db #0xbf	; 191
+      00010E A0                    1991 	.db #0xa0	; 160
+      00010F A0                    1992 	.db #0xa0	; 160
+      000110 11                    1993 	.db #0x11	; 17
+      000111 11                    1994 	.db #0x11	; 17
+      000112 00                    1995 	.db #0x00	; 0
+      000113 00                    1996 	.db #0x00	; 0
+      000114 00                    1997 	.db #0x00	; 0
+      000115 00                    1998 	.db #0x00	; 0
+      000116 00                    1999 	.db #0x00	; 0
+      000117 00                    2000 	.db #0x00	; 0
+      000118 00                    2001 	.db #0x00	; 0
+      000119 00                    2002 	.db #0x00	; 0
+      00011A 00                    2003 	.db #0x00	; 0
+      00011B 00                    2004 	.db #0x00	; 0
+      00011C 00                    2005 	.db #0x00	; 0
+      00011D 00                    2006 	.db #0x00	; 0
+      00011E 00                    2007 	.db #0x00	; 0
+      00011F 00                    2008 	.db #0x00	; 0
+      000120 80                    2009 	.db #0x80	; 128
+      000121 80                    2010 	.db #0x80	; 128
+      000122 00                    2011 	.db #0x00	; 0
+      000123 00                    2012 	.db #0x00	; 0
+      000124 80                    2013 	.db #0x80	; 128
+      000125 80                    2014 	.db #0x80	; 128
+      000126 C0                    2015 	.db #0xc0	; 192
+      000127 C0                    2016 	.db #0xc0	; 192
+      000128 E0                    2017 	.db #0xe0	; 224
+      000129 E0                    2018 	.db #0xe0	; 224
+      00012A E0                    2019 	.db #0xe0	; 224
+      00012B E0                    2020 	.db #0xe0	; 224
+      00012C A0                    2021 	.db #0xa0	; 160
+      00012D A0                    2022 	.db #0xa0	; 160
+      00012E A0                    2023 	.db #0xa0	; 160
+      00012F A0                    2024 	.db #0xa0	; 160
+      000130 00                    2025 	.db #0x00	; 0
+      000131 00                    2026 	.db #0x00	; 0
+      000132 00                    2027 	.db #0x00	; 0
+      000133 00                    2028 	.db #0x00	; 0
+      000134 00                    2029 	.db #0x00	; 0
+      000135 00                    2030 	.db #0x00	; 0
+      000136 00                    2031 	.db #0x00	; 0
+      000137 00                    2032 	.db #0x00	; 0
+      000138 00                    2033 	.db #0x00	; 0
+      000139 00                    2034 	.db #0x00	; 0
+      00013A 00                    2035 	.db #0x00	; 0
+      00013B 00                    2036 	.db #0x00	; 0
+      00013C 00                    2037 	.db #0x00	; 0
+      00013D 00                    2038 	.db #0x00	; 0
+      00013E 00                    2039 	.db #0x00	; 0
+      00013F 00                    2040 	.db #0x00	; 0
+      000140 20                    2041 	.db #0x20	; 32
+      000141 20                    2042 	.db #0x20	; 32
+      000142 91                    2043 	.db #0x91	; 145
+      000143 91                    2044 	.db #0x91	; 145
+      000144 BF                    2045 	.db #0xbf	; 191
+      000145 BF                    2046 	.db #0xbf	; 191
+      000146 EE                    2047 	.db #0xee	; 238
+      000147 EE                    2048 	.db #0xee	; 238
+      000148 FF                    2049 	.db #0xff	; 255
+      000149 FF                    2050 	.db #0xff	; 255
+      00014A FF                    2051 	.db #0xff	; 255
+      00014B FF                    2052 	.db #0xff	; 255
+      00014C 7F                    2053 	.db #0x7f	; 127
+      00014D 7F                    2054 	.db #0x7f	; 127
+      00014E 20                    2055 	.db #0x20	; 32
+      00014F 20                    2056 	.db #0x20	; 32
+      000150 40                    2057 	.db #0x40	; 64
+      000151 40                    2058 	.db #0x40	; 64
+      000152 00                    2059 	.db #0x00	; 0
+      000153 00                    2060 	.db #0x00	; 0
+      000154 00                    2061 	.db #0x00	; 0
+      000155 00                    2062 	.db #0x00	; 0
+      000156 00                    2063 	.db #0x00	; 0
+      000157 00                    2064 	.db #0x00	; 0
+      000158 00                    2065 	.db #0x00	; 0
+      000159 00                    2066 	.db #0x00	; 0
+      00015A 00                    2067 	.db #0x00	; 0
+      00015B 00                    2068 	.db #0x00	; 0
+      00015C 00                    2069 	.db #0x00	; 0
+      00015D 00                    2070 	.db #0x00	; 0
+      00015E 00                    2071 	.db #0x00	; 0
+      00015F 00                    2072 	.db #0x00	; 0
+      000160 80                    2073 	.db #0x80	; 128
+      000161 80                    2074 	.db #0x80	; 128
+      000162 20                    2075 	.db #0x20	; 32
+      000163 20                    2076 	.db #0x20	; 32
+      000164 A0                    2077 	.db #0xa0	; 160
+      000165 A0                    2078 	.db #0xa0	; 160
+      000166 E0                    2079 	.db #0xe0	; 224
+      000167 E0                    2080 	.db #0xe0	; 224
+      000168 E0                    2081 	.db #0xe0	; 224
+      000169 E0                    2082 	.db #0xe0	; 224
+      00016A E0                    2083 	.db #0xe0	; 224
+      00016B E0                    2084 	.db #0xe0	; 224
+      00016C C0                    2085 	.db #0xc0	; 192
+      00016D C0                    2086 	.db #0xc0	; 192
+      00016E 80                    2087 	.db #0x80	; 128
+      00016F 80                    2088 	.db #0x80	; 128
+      000170 40                    2089 	.db #0x40	; 64
+      000171 40                    2090 	.db #0x40	; 64
+      000172 00                    2091 	.db #0x00	; 0
+      000173 00                    2092 	.db #0x00	; 0
+      000174 00                    2093 	.db #0x00	; 0
+      000175 00                    2094 	.db #0x00	; 0
+      000176 00                    2095 	.db #0x00	; 0
+      000177 00                    2096 	.db #0x00	; 0
+      000178 00                    2097 	.db #0x00	; 0
+      000179 00                    2098 	.db #0x00	; 0
+      00017A 00                    2099 	.db #0x00	; 0
+      00017B 00                    2100 	.db #0x00	; 0
+      00017C 00                    2101 	.db #0x00	; 0
+      00017D 00                    2102 	.db #0x00	; 0
+      00017E 00                    2103 	.db #0x00	; 0
+      00017F 00                    2104 	.db #0x00	; 0
+      000180 11                    2105 	.db #0x11	; 17
+      000181 11                    2106 	.db #0x11	; 17
+      000182 4A                    2107 	.db #0x4a	; 74	'J'
+      000183 4A                    2108 	.db #0x4a	; 74	'J'
+      000184 20                    2109 	.db #0x20	; 32
+      000185 20                    2110 	.db #0x20	; 32
+      000186 11                    2111 	.db #0x11	; 17
+      000187 11                    2112 	.db #0x11	; 17
+      000188 C0                    2113 	.db #0xc0	; 192
+      000189 C0                    2114 	.db #0xc0	; 192
+      00018A 11                    2115 	.db #0x11	; 17
+      00018B 11                    2116 	.db #0x11	; 17
+      00018C 20                    2117 	.db #0x20	; 32
+      00018D 20                    2118 	.db #0x20	; 32
+      00018E 4A                    2119 	.db #0x4a	; 74	'J'
+      00018F 4A                    2120 	.db #0x4a	; 74	'J'
+      000190 11                    2121 	.db #0x11	; 17
+      000191 11                    2122 	.db #0x11	; 17
+      000192 00                    2123 	.db #0x00	; 0
+      000193 00                    2124 	.db #0x00	; 0
+      000194 00                    2125 	.db #0x00	; 0
+      000195 00                    2126 	.db #0x00	; 0
+      000196 00                    2127 	.db #0x00	; 0
+      000197 00                    2128 	.db #0x00	; 0
+      000198 00                    2129 	.db #0x00	; 0
+      000199 00                    2130 	.db #0x00	; 0
+      00019A 00                    2131 	.db #0x00	; 0
+      00019B 00                    2132 	.db #0x00	; 0
+      00019C 00                    2133 	.db #0x00	; 0
+      00019D 00                    2134 	.db #0x00	; 0
+      00019E 00                    2135 	.db #0x00	; 0
+      00019F 00                    2136 	.db #0x00	; 0
+      0001A0 00                    2137 	.db #0x00	; 0
+      0001A1 00                    2138 	.db #0x00	; 0
+      0001A2 40                    2139 	.db #0x40	; 64
+      0001A3 40                    2140 	.db #0x40	; 64
+      0001A4 80                    2141 	.db #0x80	; 128
+      0001A5 80                    2142 	.db #0x80	; 128
+      0001A6 00                    2143 	.db #0x00	; 0
+      0001A7 00                    2144 	.db #0x00	; 0
+      0001A8 60                    2145 	.db #0x60	; 96
+      0001A9 60                    2146 	.db #0x60	; 96
+      0001AA 00                    2147 	.db #0x00	; 0
+      0001AB 00                    2148 	.db #0x00	; 0
+      0001AC 80                    2149 	.db #0x80	; 128
+      0001AD 80                    2150 	.db #0x80	; 128
+      0001AE 40                    2151 	.db #0x40	; 64
+      0001AF 40                    2152 	.db #0x40	; 64
+      0001B0 00                    2153 	.db #0x00	; 0
+      0001B1 00                    2154 	.db #0x00	; 0
+      0001B2 00                    2155 	.db #0x00	; 0
+      0001B3 00                    2156 	.db #0x00	; 0
+      0001B4 00                    2157 	.db #0x00	; 0
+      0001B5 00                    2158 	.db #0x00	; 0
+      0001B6 00                    2159 	.db #0x00	; 0
+      0001B7 00                    2160 	.db #0x00	; 0
+      0001B8 00                    2161 	.db #0x00	; 0
+      0001B9 00                    2162 	.db #0x00	; 0
+      0001BA 00                    2163 	.db #0x00	; 0
+      0001BB 00                    2164 	.db #0x00	; 0
+      0001BC 00                    2165 	.db #0x00	; 0
+      0001BD 00                    2166 	.db #0x00	; 0
+      0001BE 00                    2167 	.db #0x00	; 0
+      0001BF 00                    2168 	.db #0x00	; 0
+      0001C0 00                    2169 	.db #0x00	; 0
+      0001C1 00                    2170 	.db #0x00	; 0
+      0001C2 00                    2171 	.db #0x00	; 0
+      0001C3 00                    2172 	.db #0x00	; 0
+      0001C4 04                    2173 	.db #0x04	; 4
+      0001C5 04                    2174 	.db #0x04	; 4
+      0001C6 02                    2175 	.db #0x02	; 2
+      0001C7 02                    2176 	.db #0x02	; 2
+      0001C8 04                    2177 	.db #0x04	; 4
+      0001C9 04                    2178 	.db #0x04	; 4
+      0001CA 08                    2179 	.db #0x08	; 8
+      0001CB 08                    2180 	.db #0x08	; 8
+      0001CC 04                    2181 	.db #0x04	; 4
+      0001CD 04                    2182 	.db #0x04	; 4
+      0001CE 00                    2183 	.db #0x00	; 0
+      0001CF 00                    2184 	.db #0x00	; 0
+      0001D0 00                    2185 	.db #0x00	; 0
+      0001D1 00                    2186 	.db #0x00	; 0
+      0001D2 00                    2187 	.db #0x00	; 0
+      0001D3 00                    2188 	.db #0x00	; 0
+      0001D4 00                    2189 	.db #0x00	; 0
+      0001D5 00                    2190 	.db #0x00	; 0
+      0001D6 00                    2191 	.db #0x00	; 0
+      0001D7 00                    2192 	.db #0x00	; 0
+      0001D8 00                    2193 	.db #0x00	; 0
+      0001D9 00                    2194 	.db #0x00	; 0
+      0001DA 00                    2195 	.db #0x00	; 0
+      0001DB 00                    2196 	.db #0x00	; 0
+      0001DC 00                    2197 	.db #0x00	; 0
+      0001DD 00                    2198 	.db #0x00	; 0
+      0001DE 00                    2199 	.db #0x00	; 0
+      0001DF 00                    2200 	.db #0x00	; 0
+      0001E0 00                    2201 	.db #0x00	; 0
+      0001E1 00                    2202 	.db #0x00	; 0
+      0001E2 00                    2203 	.db #0x00	; 0
+      0001E3 00                    2204 	.db #0x00	; 0
+      0001E4 00                    2205 	.db #0x00	; 0
+      0001E5 00                    2206 	.db #0x00	; 0
+      0001E6 00                    2207 	.db #0x00	; 0
+      0001E7 00                    2208 	.db #0x00	; 0
+      0001E8 00                    2209 	.db #0x00	; 0
+      0001E9 00                    2210 	.db #0x00	; 0
+      0001EA 00                    2211 	.db #0x00	; 0
+      0001EB 00                    2212 	.db #0x00	; 0
+      0001EC 00                    2213 	.db #0x00	; 0
+      0001ED 00                    2214 	.db #0x00	; 0
+      0001EE 00                    2215 	.db #0x00	; 0
+      0001EF 00                    2216 	.db #0x00	; 0
+      0001F0 00                    2217 	.db #0x00	; 0
+      0001F1 00                    2218 	.db #0x00	; 0
+      0001F2 00                    2219 	.db #0x00	; 0
+      0001F3 00                    2220 	.db #0x00	; 0
+      0001F4 00                    2221 	.db #0x00	; 0
+      0001F5 00                    2222 	.db #0x00	; 0
+      0001F6 00                    2223 	.db #0x00	; 0
+      0001F7 00                    2224 	.db #0x00	; 0
+      0001F8 00                    2225 	.db #0x00	; 0
+      0001F9 00                    2226 	.db #0x00	; 0
+      0001FA 00                    2227 	.db #0x00	; 0
+      0001FB 00                    2228 	.db #0x00	; 0
+      0001FC 00                    2229 	.db #0x00	; 0
+      0001FD 00                    2230 	.db #0x00	; 0
+      0001FE 00                    2231 	.db #0x00	; 0
+      0001FF 00                    2232 	.db #0x00	; 0
+      000200                       2233 __xinit__turret_x:
+      000200 54 00                 2234 	.dw #0x0054
+      000202                       2235 __xinit__turret_y:
+      000202 7D 00                 2236 	.dw #0x007d
+      000204                       2237 __xinit__shot_fired:
+      000204 00                    2238 	.db #0x00	;  0
+      000205                       2239 __xinit__sx:
+      000205 EC FF                 2240 	.dw #0xffec
+      000207                       2241 __xinit__sy:
+      000207 EC FF                 2242 	.dw #0xffec
+      000209                       2243 __xinit__turret_been_hit:
+      000209 00                    2244 	.db #0x00	;  0
+      00020A                       2245 __xinit__turret_blast_delay:
+      00020A 3C 00                 2246 	.dw #0x003c
+      00020C                       2247 __xinit__turret_exp_frame:
+      00020C 01 00                 2248 	.dw #0x0001
+      00020E                       2249 __xinit__turret_anim_delay:
+      00020E 0A 00                 2250 	.dw #0x000a
+      000210                       2251 __xinit__explosion_play:
+      000210 00                    2252 	.db #0x00	;  0
+      000211                       2253 __xinit__invader_x:
+      000211 55 00                 2254 	.dw #0x0055
+      000213                       2255 __xinit__invader_y:
+      000213 28 00                 2256 	.dw #0x0028
+      000215                       2257 __xinit__i_anim_delay:
+      000215 14 00                 2258 	.dw #0x0014
+      000217                       2259 __xinit__inv_frame:
+      000217 01 00                 2260 	.dw #0x0001
+      000219                       2261 __xinit__ix_speed:
+      000219 02 00                 2262 	.dw #0x0002
+      00021B                       2263 __xinit__i_dir:
+      00021B 01 00                 2264 	.dw #0x0001
+      00021D                       2265 __xinit__inv_shot_x:
+      00021D A5 00                 2266 	.dw #0x00a5
+      00021F                       2267 __xinit__inv_shot_y:
+      00021F 90 00                 2268 	.dw #0x0090
+      000221                       2269 __xinit__inv_fire_pause:
+      000221 B4 00                 2270 	.dw #0x00b4
+      000223                       2271 __xinit__inv_fired:
+      000223 00                    2272 	.db #0x00	;  0
+      000224                       2273 __xinit__been_hit:
+      000224 00                    2274 	.db #0x00	;  0
+      000225                       2275 __xinit__bx:
+      000225 A5 00                 2276 	.dw #0x00a5
+      000227                       2277 __xinit__by:
+      000227 90 00                 2278 	.dw #0x0090
+      000229                       2279 __xinit__blast_delay:
+      000229 3C 00                 2280 	.dw #0x003c
+      00022B                       2281 __xinit__score:
+      00022B 00 00                 2282 	.dw #0x0000
+      00022D                       2283 __xinit__lives:
+      00022D 03 00                 2284 	.dw #0x0003
+      00022F                       2285 __xinit__game_over:
+      00022F 00                    2286 	.db #0x00	;  0
+                                   2287 	.area _CABS (ABS)

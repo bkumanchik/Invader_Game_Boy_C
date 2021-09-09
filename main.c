@@ -6,7 +6,7 @@
 // Notes: Game Boy resolution = 160 x 144
 
 
-// to do: fix autofire, random invader X, sound
+// to do: random invader X after blast
 
 
 // includes
@@ -53,13 +53,13 @@ bool been_hit = false;  // invader hit state
 int bx = 165; // blast x
 int by = 144; // blast y
 int blast_delay = 60; // invader blast delay - pause after explosion
-// bool boom_play = false; 
+bool boom_play = false; 
 
 // starting score, lives and game state
 int score = 0;
 int lives = 3;
 bool game_over = false;
-/////bool been_pressed = false; //has fire button been pressed
+bool been_pressed = false; //has fire button been pressed
 
 
 
@@ -136,9 +136,12 @@ void invader_fire() {
 // function to make turret explode (when hit) then start back in center
 void turret_hit() {    
     if (turret_been_hit) {
-        if (!(explosion_play)) {            
-            //Sound explosionWav = LoadSound("sounds/explosion.wav");  
-            //PlaySound(explosionWav);  
+        if (!(explosion_play)) {                
+            // play sound explosion 
+            NR41_REG = 0x09;  
+            NR42_REG = 0xF1; 
+            NR43_REG = 0x81;  
+            NR44_REG = 0xC0;  
         }
 
         explosion_play = true;        
@@ -167,21 +170,24 @@ void turret_hit() {
 // function to make invader explode (when hit) then randomly start somewhere else
 void invader_hit() {
     if (been_hit) {
-        //if (!(boom_play)) {
-            //Sound boomWav = LoadSound("sounds/boom.wav");  
-            //PlaySound(boomWav);
-        //}       
-        
+        if (!(boom_play)) {
+            // play sound boom 
+            NR41_REG = 0x00;  
+            NR42_REG = 0x92; 
+            NR43_REG = 0x4f;  
+            NR44_REG = 0xC0; 
+        }               
+
         inv_shot_x = 165; // hide shot
         inv_shot_y = 144; // hide shot
         inv_fire_pause = 180; // and reset pause
         
-        //boom_play = true;        
+        boom_play = true;        
         blast_delay -= 1;
 
         if (blast_delay < 0) {
             blast_delay = 60;
-            //boom_play = false;
+            boom_play = false;
             been_hit = false;
             bx = 165; // move boom off screen (following invader)
             by = 144;
@@ -205,7 +211,14 @@ void main() {
     font_set(main_font);
 
     
-    int joydata; // for reading joystick
+    // sound setup
+    NR52_REG = 0x80;    // $80 is 1000 0000 in binary and turns on sound
+    NR50_REG = 0x77;    // $77 is 0111 0111 in binary and sets the volume for both left and right channel just set to max 0x77
+    NR51_REG = 0xFF;    // $FF is 1111 1111 in binary, select which chanels we want to use in this case all of them. 
+                        // One bit for the L one bit for the R of all four channels
+
+    
+    
     // tells GBDK to load two 8x8 sprites at once, making one 8x16 tile
     SPRITES_8x16;
 
@@ -254,8 +267,7 @@ void main() {
     // game loop -------------------------------------------------------------
     while(1) {
         // game over state ---------------------------------------------------
-        joydata = joypad(); // Read once per frame and cache the result
-        
+             
         
         if(game_over) {
             // draw text 
@@ -267,9 +279,8 @@ void main() {
             printf("GAME  OVER");
 
 
-        // reset stuff
-            //if (IsGamepadButtonPressed(0, 6)) { // B 
-            if(joydata & J_START) {                    
+        // reset stuff            
+            if(joypad() & J_START) {                    
                 turret_x = 84;  // turret starting x
                 turret_y = 125; // turret starting y
                 invader_x = 85; // invader starting x
@@ -303,35 +314,45 @@ void main() {
             turret_hit();
         
 
-            // move and fire turret        
-            joydata = joypad(); // Read once per frame and cache the result
+            // move and fire turret                  
             // check joypad Right
-            if(joydata & J_RIGHT && (!(turret_been_hit))) {            
+            if(joypad() & J_RIGHT && !(turret_been_hit)) {            
                 if(turret_x < 142) {
                     turret_x += 1; 
                 }                      
             }  
             // check joypad Left
-            if(joydata & J_LEFT && (!(turret_been_hit))) {            
+            if(joypad() & J_LEFT && !(turret_been_hit)) {            
                 if(turret_x > 21) {
                         turret_x -= 1; 
                 }                 
             } 
-            // check joypad A button        
-            if(joydata & J_A && !(shot_fired) && (!(turret_been_hit))) {    
-                //Sound pewWav = LoadSound("sounds/pew.wav"); 
-                //PlaySound(pewWav);            
+            // check joypad A button             
+            if(joypad() & J_A && !(been_pressed) && !(shot_fired) && !(turret_been_hit)) {                 
+                // play sound - pew 
+                NR41_REG = 0x07;  
+                NR42_REG = 0x72; 
+                NR43_REG = 0x21;  
+                NR44_REG = 0xC0;  
+
+                been_pressed = true;
                 shot_fired = true;               
                 sx=turret_x;
                 sy=turret_y + 6;
             }
-
+            if(!(joypad() & J_A)) {
+                been_pressed = false; // fixes autofire, also with line below...
+            }
+            
 
             // check for turret shot going off screen before allowing to fire again
             if (shot_fired) {
-                sy -= 3; 
-                if (sy < 41) {
-                    shot_fired = false;
+                sy -= 3;             
+
+                if (sy < 41) {                    
+                    if(!(been_pressed)) { // ...here!
+                        shot_fired = false;
+                    }
                     sx = 165;
                     sy = 0;
                 }
@@ -362,7 +383,13 @@ void main() {
                 if (!(turret_been_hit)) {
                     lives -= 1;
                     
-                    if (lives == 0) {                    
+                    if (lives == 0) {  
+                        // play sound explosion 
+                        NR41_REG = 0x09;  
+                        NR42_REG = 0xF1; 
+                        NR43_REG = 0x81;  
+                        NR44_REG = 0xC0;  
+
                         game_over = true;                                                  
                     }
                 turret_been_hit = true;            

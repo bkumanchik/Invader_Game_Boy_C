@@ -8,16 +8,25 @@ Symbol Table
     .__.CPU.                                                    =  000000 L
     .__.H$L.                                                    =  000000 L
     _LCDC_REG                                                      ****** GX
-  0 ___str_0                                                       000734 R
-  0 ___str_1                                                       00073E R
-  0 ___str_2                                                       000748 R
-  0 ___str_3                                                       000753 R
+    _NR41_REG                                                      ****** GX
+    _NR42_REG                                                      ****** GX
+    _NR43_REG                                                      ****** GX
+    _NR44_REG                                                      ****** GX
+    _NR50_REG                                                      ****** GX
+    _NR51_REG                                                      ****** GX
+    _NR52_REG                                                      ****** GX
+  0 ___str_0                                                       0007B1 R
+  0 ___str_1                                                       0007BB R
+  0 ___str_2                                                       0007C5 R
+  0 ___str_3                                                       0007D0 R
   7 __xinit__been_hit                                              000224 R
+  7 __xinit__been_pressed                                          000231 R
   7 __xinit__blast_delay                                           000229 R
+  7 __xinit__boom_play                                             00022B R
   7 __xinit__bx                                                    000225 R
   7 __xinit__by                                                    000227 R
   7 __xinit__explosion_play                                        000210 R
-  7 __xinit__game_over                                             00022F R
+  7 __xinit__game_over                                             000230 R
   7 __xinit__i_anim_delay                                          000215 R
   7 __xinit__i_dir                                                 00021B R
   7 __xinit__inv_fire_pause                                        000221 R
@@ -28,8 +37,8 @@ Symbol Table
   7 __xinit__invader_x                                             000211 R
   7 __xinit__invader_y                                             000213 R
   7 __xinit__ix_speed                                              000219 R
-  7 __xinit__lives                                                 00022D R
-  7 __xinit__score                                                 00022B R
+  7 __xinit__lives                                                 00022E R
+  7 __xinit__score                                                 00022C R
   7 __xinit__shot_fired                                            000204 R
   7 __xinit__sprites_invader                                       000100 R
   7 __xinit__sprites_turret                                        000000 R
@@ -42,15 +51,22 @@ Symbol Table
   7 __xinit__turret_x                                              000200 R
   7 __xinit__turret_y                                              000202 R
   2 _been_hit                                                      000224 GR
+  2 _been_pressed                                                  000231 GR
   2 _blast_delay                                                   000229 GR
+  2 _boom_play                                                     00022B GR
   2 _bx                                                            000225 GR
   2 _by                                                            000227 GR
   2 _explosion_play                                                000210 GR
     _font_init                                                     ****** GX
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
     _font_load                                                     ****** GX
     _font_min                                                      ****** GX
     _font_set                                                      ****** GX
-  2 _game_over                                                     00022F GR
+  2 _game_over                                                     000230 GR
     _gotoxy                                                        ****** GX
   2 _i_anim_delay                                                  000215 GR
   2 _i_dir                                                         00021B GR
@@ -58,24 +74,19 @@ Symbol Table
   2 _inv_fired                                                     000223 GR
   2 _inv_frame                                                     000217 GR
   2 _inv_shot_x                                                    00021D GR
-ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
-Hexadecimal [24-Bits]
-
-Symbol Table
-
   2 _inv_shot_y                                                    00021F GR
   0 _invader_fire                                                  00018D GR
-  0 _invader_hit                                                   000254 GR
+  0 _invader_hit                                                   00026B GR
   2 _invader_x                                                     000211 GR
   2 _invader_y                                                     000213 GR
   2 _ix_speed                                                      000219 GR
     _joypad                                                        ****** GX
-  2 _lives                                                         00022D GR
-  0 _main                                                          0002AC GR
+  2 _lives                                                         00022E GR
+  0 _main                                                          0002E3 GR
   0 _move_anim_inv                                                 000000 GR
     _printf                                                        ****** GX
   1 _rand_x                                                        000000 GR
-  2 _score                                                         00022B GR
+  2 _score                                                         00022C GR
     _set_sprite_data                                               ****** GX
     _shadow_OAM                                                    ****** GX
   2 _shot_fired                                                    000204 GR
@@ -98,13 +109,13 @@ Hexadecimal [24-Bits]
 
 Area Table
 
-   0 _CODE                                      size    75E   flags    0
+   0 _CODE                                      size    7DB   flags    0
    1 _DATA                                      size      2   flags    0
-   2 _INITIALIZED                               size    230   flags    0
+   2 _INITIALIZED                               size    232   flags    0
    3 _DABS                                      size      0   flags    8
    4 _HOME                                      size      0   flags    0
    5 _GSINIT                                    size      0   flags    0
    6 _GSFINAL                                   size      0   flags    0
-   7 _INITIALIZER                               size    230   flags    0
+   7 _INITIALIZER                               size    232   flags    0
    8 _CABS                                      size      0   flags    8
 

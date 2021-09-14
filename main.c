@@ -20,6 +20,8 @@
 // include sprite c file
 #include "sprites_turret.c"
 #include "sprites_invader.c"
+#include "title_data.c" // title screen data
+#include "title_map.c" // title screen map
 
 
 // variables ----------------------------------------------------------------------
@@ -59,9 +61,8 @@ bool boom_play = false;
 int score = 0;
 int lives = 3;
 bool game_over = false;
-bool been_pressed = false; //has fire button been pressed
-
-
+bool been_pressed = false; // has fire button been pressed
+          
 
 // my functions --------------------------------------------------------------------
 
@@ -203,6 +204,14 @@ void invader_hit() {
 
 // main----- ----------------------------------------------------------------------
 void main() {
+    // display title screen and wait for Start to be pressed        
+    set_bkg_data(0, 66, title_data);
+    set_bkg_tiles(0, 0, 20, 18, title_map);
+    SHOW_BKG;
+    DISPLAY_ON;
+    waitpad(J_START); // check for Start to be pressed
+
+
     // font setup 
     font_t main_font;
     font_init();
@@ -266,9 +275,7 @@ void main() {
 
     // game loop -------------------------------------------------------------
     while(1) {
-        // game over state ---------------------------------------------------
-             
-        
+        // game over state ---------------------------------------------------        
         if(game_over) {
             // draw text 
             gotoxy(1, 1);        
@@ -300,7 +307,7 @@ void main() {
 
 
         // game running state ---------------------------------------------------
-        if(!(game_over)) {         
+        if(!(game_over)){              
             // call function to move and animate invader   
             move_anim_inv(); 
 

@@ -1,4 +1,4 @@
-// Invader for Game Boy with C using GBDK library
+// Invader for Game Boy with C using GBDK 2020 library
 // Started 9/1/2021
 // Brian Kumanchik
 
@@ -6,7 +6,7 @@
 // Notes: Game Boy resolution = 160 x 144
 
 
-// to do: random invader X after blast
+// to do: random invader X after blast (maybe fake it)
 
 
 // includes

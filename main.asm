@@ -231,7 +231,7 @@ _move_anim_inv::
 	ld	hl, #_been_hit
 	bit	0, (hl)
 	jp	NZ, 00116$
-;main.c:83: if ((i_dir == 1) && (invader_x <= 144)) {
+;main.c:83: if ((i_dir == 1) && (invader_x <= 140)) {
 ;setupPair	HL
 	ld	hl, #_i_dir
 ;setupPair	HL
@@ -241,7 +241,7 @@ _move_anim_inv::
 	jr	NZ, 00106$
 ;setupPair	HL
 	ld	hl, #_invader_x
-	ld	a, #0x90
+	ld	a, #0x8c
 	sub	a, (hl)
 	inc	hl
 	ld	a, #0x00
@@ -276,11 +276,11 @@ _move_anim_inv::
 	adc	a, (hl)
 ;setupPair	HL
 	ld	hl, #_invader_x + 1
-;main.c:85: if (invader_x >= 144) {                    
+;main.c:85: if (invader_x >= 140) {                    
 ;setupPair	HL
 	ld	(hl-), a
 	ld	a, (hl+)
-	sub	a, #0x90
+	sub	a, #0x8c
 	ld	a, (hl)
 	sbc	a, #0x00
 	ld	d, (hl)
@@ -3805,7 +3805,7 @@ __xinit__turret_anim_delay:
 __xinit__explosion_play:
 	.db #0x00	;  0
 __xinit__invader_x:
-	.dw #0x0055
+	.dw #0x0054
 __xinit__invader_y:
 	.dw #0x0028
 __xinit__i_anim_delay:

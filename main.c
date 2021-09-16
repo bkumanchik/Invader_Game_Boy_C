@@ -38,7 +38,7 @@ int turret_anim_delay = 10; // turret explode animation delay
 bool explosion_play = false; 
 
 // invader variables
-int invader_x = 85; // invader starting x
+int invader_x = 84; // invader starting x
 int invader_y = 40; // invader starting y
 int i_anim_delay = 20; // invader animation (and move) delay
 int inv_frame = 1; // invader start animation frame
@@ -80,9 +80,9 @@ void move_anim_inv() {
 
         if(!(been_hit)) {
             // move right
-            if ((i_dir == 1) && (invader_x <= 144)) {
+            if ((i_dir == 1) && (invader_x <= 140)) {
                 invader_x += ix_speed;
-                if (invader_x >= 144) {                    
+                if (invader_x >= 140) {                    
                     invader_y += 4; // step down
                     i_dir = 0;
                 }
@@ -194,7 +194,7 @@ void invader_hit() {
             by = 144;
             //(rand() % (upper - lower + 1)) + lower            
             //invader_x = rand() % (144 - 24 + 1) + 24; // move invader to random x position    
-            invader_x = 85; // move invader back up after being hit        
+            invader_x = 84; // move invader back up after being hit        
             invader_y = 40; // move invader back up after being hit
         }
     }

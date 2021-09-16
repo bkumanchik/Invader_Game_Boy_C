@@ -231,7 +231,7 @@
       000046 21r24r02               231 	ld	hl, #_been_hit
       000049 CB 46                  232 	bit	0, (hl)
       00004B C2r34r01               233 	jp	NZ, 00116$
-                                    234 ;main.c:83: if ((i_dir == 1) && (invader_x <= 144)) {
+                                    234 ;main.c:83: if ((i_dir == 1) && (invader_x <= 140)) {
                                     235 ;setupPair	HL
       00004E 21r1Br02               236 	ld	hl, #_i_dir
                                     237 ;setupPair	HL
@@ -241,7 +241,7 @@
       000054 20 5F                  241 	jr	NZ, 00106$
                                     242 ;setupPair	HL
       000056 21r11r02               243 	ld	hl, #_invader_x
-      000059 3E 90                  244 	ld	a, #0x90
+      000059 3E 8C                  244 	ld	a, #0x8c
       00005B 96                     245 	sub	a, (hl)
       00005C 23                     246 	inc	hl
       00005D 3E 00                  247 	ld	a, #0x00
@@ -276,11 +276,11 @@
       000084 8E                     276 	adc	a, (hl)
                                     277 ;setupPair	HL
       000085 21r12r02               278 	ld	hl, #_invader_x + 1
-                                    279 ;main.c:85: if (invader_x >= 144) {                    
+                                    279 ;main.c:85: if (invader_x >= 140) {                    
                                     280 ;setupPair	HL
       000088 32                     281 	ld	(hl-), a
       000089 2A                     282 	ld	a, (hl+)
-      00008A D6 90                  283 	sub	a, #0x90
+      00008A D6 8C                  283 	sub	a, #0x8c
       00008C 7E                     284 	ld	a, (hl)
       00008D DE 00                  285 	sbc	a, #0x00
       00008F 56                     286 	ld	d, (hl)
@@ -3809,7 +3809,7 @@
       000210                       3805 __xinit__explosion_play:
       000210 00                    3806 	.db #0x00	;  0
       000211                       3807 __xinit__invader_x:
-      000211 55 00                 3808 	.dw #0x0055
+      000211 54 00                 3808 	.dw #0x0054
       000213                       3809 __xinit__invader_y:
       000213 28 00                 3810 	.dw #0x0028
       000215                       3811 __xinit__i_anim_delay:

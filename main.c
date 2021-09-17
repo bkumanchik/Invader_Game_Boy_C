@@ -6,9 +6,6 @@
 // Notes: Game Boy resolution = 160 x 144
 
 
-// to do: random invader X after blast (maybe fake it)
-
-
 // includes
 #include <gb/gb.h>
 #include <stdio.h>
@@ -192,9 +189,7 @@ void invader_hit() {
             been_hit = false;
             bx = 165; // move boom off screen (following invader)
             by = 144;
-            //(rand() % (upper - lower + 1)) + lower            
-            //invader_x = rand() % (144 - 24 + 1) + 24; // move invader to random x position    
-            invader_x = 84; // move invader back up after being hit        
+            invader_x = ((unsigned char)rand() % (140 - 24 + 1)) + 24; // move invader to random x position       
             invader_y = 40; // move invader back up after being hit
         }
     }

@@ -17,6 +17,7 @@
 	.globl _font_set
 	.globl _font_load
 	.globl _font_init
+	.globl _rand
 	.globl _printf
 	.globl _set_sprite_data
 	.globl _set_bkg_tiles
@@ -153,12 +154,12 @@ _been_pressed::
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-;main.c:70: void move_anim_inv() { 
+;main.c:67: void move_anim_inv() { 
 ;	---------------------------------
 ; Function move_anim_inv
 ; ---------------------------------
 _move_anim_inv::
-;main.c:71: i_anim_delay -=1;
+;main.c:68: i_anim_delay -=1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_i_anim_delay
@@ -173,12 +174,12 @@ _move_anim_inv::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:73: if(i_anim_delay < 0) {
+;main.c:70: if(i_anim_delay < 0) {
 ;setupPair	HL
 	ld	a, (hl)
 	bit	7, a
 	jp	Z, 00116$
-;main.c:74: i_anim_delay = 20;
+;main.c:71: i_anim_delay = 20;
 ;setupPair	HL
 	dec	hl
 ;setupPair	HL
@@ -186,7 +187,7 @@ _move_anim_inv::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:76: inv_frame += 1;        
+;main.c:73: inv_frame += 1;        
 ;setupPair	HL
 	ld	hl, #_inv_frame
 	inc	(hl)
@@ -195,7 +196,7 @@ _move_anim_inv::
 	inc	hl
 	inc	(hl)
 00195$:
-;main.c:77: if (inv_frame > 2) {
+;main.c:74: if (inv_frame > 2) {
 ;setupPair	HL
 	ld	hl, #_inv_frame
 	ld	a, #0x02
@@ -217,7 +218,7 @@ _move_anim_inv::
 	scf
 00197$:
 	jr	NC, 00102$
-;main.c:78: inv_frame = 1;
+;main.c:75: inv_frame = 1;
 ;setupPair	HL
 	ld	hl, #_inv_frame
 ;setupPair	HL
@@ -226,12 +227,12 @@ _move_anim_inv::
 	xor	a, a
 	ld	(hl), a
 00102$:
-;main.c:81: if(!(been_hit)) {
+;main.c:78: if(!(been_hit)) {
 ;setupPair	HL
 	ld	hl, #_been_hit
 	bit	0, (hl)
 	jp	NZ, 00116$
-;main.c:83: if ((i_dir == 1) && (invader_x <= 140)) {
+;main.c:80: if ((i_dir == 1) && (invader_x <= 140)) {
 ;setupPair	HL
 	ld	hl, #_i_dir
 ;setupPair	HL
@@ -260,7 +261,7 @@ _move_anim_inv::
 	scf
 00201$:
 	jr	C, 00106$
-;main.c:84: invader_x += ix_speed;
+;main.c:81: invader_x += ix_speed;
 ;setupPair	HL
 	ld	a, (#_invader_x)
 ;setupPair	HL
@@ -276,7 +277,7 @@ _move_anim_inv::
 	adc	a, (hl)
 ;setupPair	HL
 	ld	hl, #_invader_x + 1
-;main.c:85: if (invader_x >= 140) {                    
+;main.c:82: if (invader_x >= 140) {                    
 ;setupPair	HL
 	ld	(hl-), a
 	ld	a, (hl+)
@@ -297,7 +298,7 @@ _move_anim_inv::
 	scf
 00203$:
 	jr	C, 00106$
-;main.c:86: invader_y += 4; // step down
+;main.c:83: invader_y += 4; // step down
 ;setupPair	HL
 	ld	hl, #_invader_y
 	ld	a, (hl)
@@ -309,7 +310,7 @@ _move_anim_inv::
 	adc	a, #0x00
 ;setupPair	HL
 	ld	(hl), a
-;main.c:87: i_dir = 0;
+;main.c:84: i_dir = 0;
 	xor	a, a
 ;setupPair	HL
 	ld	hl, #_i_dir
@@ -317,7 +318,7 @@ _move_anim_inv::
 	ld	(hl+), a
 	ld	(hl), a
 00106$:
-;main.c:91: if ((i_dir < 1) && (invader_x >= 24)) {
+;main.c:88: if ((i_dir < 1) && (invader_x >= 24)) {
 ;setupPair	HL
 	ld	hl, #_i_dir
 	ld	a, (hl+)
@@ -358,7 +359,7 @@ _move_anim_inv::
 	scf
 00207$:
 	jr	C, 00116$
-;main.c:92: invader_x -= ix_speed;
+;main.c:89: invader_x -= ix_speed;
 ;setupPair	HL
 	ld	a, (#_invader_x)
 ;setupPair	HL
@@ -374,7 +375,7 @@ _move_anim_inv::
 	sbc	a, (hl)
 ;setupPair	HL
 	ld	hl, #_invader_x + 1
-;main.c:93: if (invader_x <= 24) {                    
+;main.c:90: if (invader_x <= 24) {                    
 ;setupPair	HL
 	ld	(hl-), a
 	ld	a, #0x18
@@ -396,7 +397,7 @@ _move_anim_inv::
 	scf
 00209$:
 	jr	C, 00116$
-;main.c:94: invader_y += 4; // step down
+;main.c:91: invader_y += 4; // step down
 ;setupPair	HL
 	ld	hl, #_invader_y
 	ld	a, (hl)
@@ -408,7 +409,7 @@ _move_anim_inv::
 	adc	a, #0x00
 ;setupPair	HL
 	ld	(hl), a
-;main.c:95: i_dir = 1;           
+;main.c:92: i_dir = 1;           
 ;setupPair	HL
 	ld	hl, #_i_dir
 ;setupPair	HL
@@ -417,12 +418,12 @@ _move_anim_inv::
 	xor	a, a
 	ld	(hl), a
 00116$:
-;main.c:101: if (!(been_hit)) {
+;main.c:98: if (!(been_hit)) {
 ;setupPair	HL
 	ld	hl, #_been_hit
 	bit	0, (hl)
 	jr	NZ, 00123$
-;main.c:102: if(inv_frame == 1) {
+;main.c:99: if(inv_frame == 1) {
 ;setupPair	HL
 	ld	hl, #_inv_frame
 ;setupPair	HL
@@ -435,10 +436,10 @@ _move_anim_inv::
 	ld	(hl), #0x10
 	ld	hl, #(_shadow_OAM + 38)
 	ld	(hl), #0x12
-;main.c:104: set_sprite_tile( 9, 18);             
+;main.c:101: set_sprite_tile( 9, 18);             
 	jr	00124$
 00120$:
-;main.c:106: else if(inv_frame == 2) {
+;main.c:103: else if(inv_frame == 2) {
 ;setupPair	HL
 	ld	hl, #_inv_frame
 ;setupPair	HL
@@ -451,7 +452,7 @@ _move_anim_inv::
 	ld	(hl), #0x14
 	ld	hl, #(_shadow_OAM + 38)
 	ld	(hl), #0x16
-;main.c:108: set_sprite_tile(9, 22);             
+;main.c:105: set_sprite_tile(9, 22);             
 	jr	00124$
 00123$:
 ;c:/gbdk/include/gb/gb.h:1174: shadow_OAM[nb].tile=tile;
@@ -459,9 +460,9 @@ _move_anim_inv::
 	ld	(hl), #0x18
 	ld	hl, #(_shadow_OAM + 38)
 	ld	(hl), #0x1a
-;main.c:113: set_sprite_tile(9, 26); 
+;main.c:110: set_sprite_tile(9, 26); 
 00124$:
-;main.c:116: move_sprite(8, invader_x, invader_y);
+;main.c:113: move_sprite(8, invader_x, invader_y);
 ;setupPair	HL
 	ld	hl, #_invader_y
 	ld	b, (hl)
@@ -474,7 +475,7 @@ _move_anim_inv::
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-;main.c:117: move_sprite(9, invader_x + 8, invader_y);
+;main.c:114: move_sprite(9, invader_x + 8, invader_y);
 ;setupPair	HL
 	ld	hl, #_invader_y
 	ld	b, (hl)
@@ -488,8 +489,8 @@ _move_anim_inv::
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-;main.c:117: move_sprite(9, invader_x + 8, invader_y);
-;main.c:118: }
+;main.c:114: move_sprite(9, invader_x + 8, invader_y);
+;main.c:115: }
 	ret
 _title_data:
 	.db #0x00	; 0
@@ -1909,12 +1910,12 @@ _title_map:
 	.db #0x00	; 0
 	.db #0x00	; 0
 	.db #0x00	; 0
-;main.c:122: void invader_fire() {    
+;main.c:119: void invader_fire() {    
 ;	---------------------------------
 ; Function invader_fire
 ; ---------------------------------
 _invader_fire::
-;main.c:123: inv_fire_pause -= 1;
+;main.c:120: inv_fire_pause -= 1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_inv_fire_pause
@@ -1929,12 +1930,12 @@ _invader_fire::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:125: if (!(inv_fired)) { // so once invader shot is fired it doesn't follow the invader still
+;main.c:122: if (!(inv_fired)) { // so once invader shot is fired it doesn't follow the invader still
 ;setupPair	HL
 	ld	hl, #_inv_fired
 	bit	0, (hl)
 	jr	NZ, 00102$
-;main.c:126: inv_shot_x = invader_x;
+;main.c:123: inv_shot_x = invader_x;
 ;setupPair	HL
 	ld	a, (#_invader_x)
 ;setupPair	HL
@@ -1943,7 +1944,7 @@ _invader_fire::
 	ld	a, (#_invader_x + 1)
 ;setupPair	HL
 	ld	(#_inv_shot_x + 1),a
-;main.c:127: inv_shot_y = invader_y;
+;main.c:124: inv_shot_y = invader_y;
 ;setupPair	HL
 	ld	a, (#_invader_y)
 ;setupPair	HL
@@ -1953,16 +1954,16 @@ _invader_fire::
 ;setupPair	HL
 	ld	(#_inv_shot_y + 1),a
 00102$:
-;main.c:130: if (inv_fire_pause < 0) {
+;main.c:127: if (inv_fire_pause < 0) {
 ;setupPair	HL
 	ld	a, (#_inv_fire_pause + 1)
 	bit	7, a
 	ret	Z
-;main.c:131: inv_fired = true;
+;main.c:128: inv_fired = true;
 ;setupPair	HL
 	ld	hl, #_inv_fired
 	ld	(hl), #0x01
-;main.c:132: inv_shot_y += 3;            
+;main.c:129: inv_shot_y += 3;            
 ;setupPair	HL
 	ld	hl, #_inv_shot_y
 	ld	a, (hl)
@@ -1974,41 +1975,41 @@ _invader_fire::
 	adc	a, #0x00
 ;setupPair	HL
 	ld	(hl), a
-;main.c:134: }    
+;main.c:131: }    
 	ret
-;main.c:138: void turret_hit() {    
+;main.c:135: void turret_hit() {    
 ;	---------------------------------
 ; Function turret_hit
 ; ---------------------------------
 _turret_hit::
-;main.c:139: if (turret_been_hit) {
+;main.c:136: if (turret_been_hit) {
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
 	ret	Z
-;main.c:140: if (!(explosion_play)) {                
+;main.c:137: if (!(explosion_play)) {                
 ;setupPair	HL
 	ld	hl, #_explosion_play
 	bit	0, (hl)
 	jr	NZ, 00102$
-;main.c:142: NR41_REG = 0x09;  
+;main.c:139: NR41_REG = 0x09;  
 	ld	a, #0x09
 	ldh	(_NR41_REG + 0), a
-;main.c:143: NR42_REG = 0xF1; 
+;main.c:140: NR42_REG = 0xF1; 
 	ld	a, #0xf1
 	ldh	(_NR42_REG + 0), a
-;main.c:144: NR43_REG = 0x81;  
+;main.c:141: NR43_REG = 0x81;  
 	ld	a, #0x81
 	ldh	(_NR43_REG + 0), a
-;main.c:145: NR44_REG = 0xC0;  
+;main.c:142: NR44_REG = 0xC0;  
 	ld	a, #0xc0
 	ldh	(_NR44_REG + 0), a
 00102$:
-;main.c:148: explosion_play = true;        
+;main.c:145: explosion_play = true;        
 ;setupPair	HL
 	ld	hl, #_explosion_play
 	ld	(hl), #0x01
-;main.c:149: turret_anim_delay -= 1;
+;main.c:146: turret_anim_delay -= 1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_turret_anim_delay
@@ -2023,7 +2024,7 @@ _turret_hit::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:150: turret_blast_delay -= 1;
+;main.c:147: turret_blast_delay -= 1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_turret_blast_delay
@@ -2038,12 +2039,12 @@ _turret_hit::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:152: if (turret_anim_delay < 0) {
+;main.c:149: if (turret_anim_delay < 0) {
 ;setupPair	HL
 	ld	a, (#_turret_anim_delay + 1)
 	bit	7, a
 	jr	Z, 00106$
-;main.c:153: turret_exp_frame += 1;
+;main.c:150: turret_exp_frame += 1;
 ;setupPair	HL
 	ld	hl, #_turret_exp_frame
 	inc	(hl)
@@ -2052,7 +2053,7 @@ _turret_hit::
 	inc	hl
 	inc	(hl)
 00138$:
-;main.c:154: if (turret_exp_frame > 2) {
+;main.c:151: if (turret_exp_frame > 2) {
 ;setupPair	HL
 	ld	hl, #_turret_exp_frame
 	ld	a, #0x02
@@ -2074,7 +2075,7 @@ _turret_hit::
 	scf
 00140$:
 	jr	NC, 00104$
-;main.c:155: turret_exp_frame = 1;                
+;main.c:152: turret_exp_frame = 1;                
 ;setupPair	HL
 	ld	hl, #_turret_exp_frame
 ;setupPair	HL
@@ -2083,7 +2084,7 @@ _turret_hit::
 	xor	a, a
 	ld	(hl), a
 00104$:
-;main.c:157: turret_anim_delay = 10;  
+;main.c:154: turret_anim_delay = 10;  
 ;setupPair	HL
 	ld	hl, #_turret_anim_delay
 ;setupPair	HL
@@ -2092,12 +2093,12 @@ _turret_hit::
 	xor	a, a
 	ld	(hl), a
 00106$:
-;main.c:160: if (turret_blast_delay < 0) {
+;main.c:157: if (turret_blast_delay < 0) {
 ;setupPair	HL
 	ld	hl, #_turret_blast_delay + 1
 	bit	7, (hl)
 	ret	Z
-;main.c:161: turret_blast_delay = 60;
+;main.c:158: turret_blast_delay = 60;
 ;setupPair	HL
 	dec	hl
 ;setupPair	HL
@@ -2105,15 +2106,15 @@ _turret_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:162: turret_been_hit = false;                 
+;main.c:159: turret_been_hit = false;                 
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	ld	(hl), #0x00
-;main.c:163: explosion_play = false;
+;main.c:160: explosion_play = false;
 ;setupPair	HL
 	ld	hl, #_explosion_play
 	ld	(hl), #0x00
-;main.c:164: turret_x = 84; // reset turret x
+;main.c:161: turret_x = 84; // reset turret x
 ;setupPair	HL
 	ld	hl, #_turret_x
 ;setupPair	HL
@@ -2121,7 +2122,7 @@ _turret_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:165: turret_y = 125; // reset turret y
+;main.c:162: turret_y = 125; // reset turret y
 ;setupPair	HL
 	ld	hl, #_turret_y
 ;setupPair	HL
@@ -2129,37 +2130,37 @@ _turret_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:168: }
+;main.c:165: }
 	ret
-;main.c:172: void invader_hit() {
+;main.c:169: void invader_hit() {
 ;	---------------------------------
 ; Function invader_hit
 ; ---------------------------------
 _invader_hit::
-;main.c:173: if (been_hit) {
+;main.c:170: if (been_hit) {
 ;setupPair	HL
 	ld	hl, #_been_hit
 	bit	0, (hl)
 	ret	Z
-;main.c:174: if (!(boom_play)) {
+;main.c:171: if (!(boom_play)) {
 ;setupPair	HL
 	ld	hl, #_boom_play
 	bit	0, (hl)
 	jr	NZ, 00102$
-;main.c:176: NR41_REG = 0x00;  
+;main.c:173: NR41_REG = 0x00;  
 	xor	a, a
 	ldh	(_NR41_REG + 0), a
-;main.c:177: NR42_REG = 0x92; 
+;main.c:174: NR42_REG = 0x92; 
 	ld	a, #0x92
 	ldh	(_NR42_REG + 0), a
-;main.c:178: NR43_REG = 0x4f;  
+;main.c:175: NR43_REG = 0x4f;  
 	ld	a, #0x4f
 	ldh	(_NR43_REG + 0), a
-;main.c:179: NR44_REG = 0xC0; 
+;main.c:176: NR44_REG = 0xC0; 
 	ld	a, #0xc0
 	ldh	(_NR44_REG + 0), a
 00102$:
-;main.c:182: inv_shot_x = 165; // hide shot
+;main.c:179: inv_shot_x = 165; // hide shot
 ;setupPair	HL
 	ld	hl, #_inv_shot_x
 ;setupPair	HL
@@ -2167,7 +2168,7 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:183: inv_shot_y = 144; // hide shot
+;main.c:180: inv_shot_y = 144; // hide shot
 ;setupPair	HL
 	ld	hl, #_inv_shot_y
 ;setupPair	HL
@@ -2175,7 +2176,7 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:184: inv_fire_pause = 180; // and reset pause
+;main.c:181: inv_fire_pause = 180; // and reset pause
 ;setupPair	HL
 	ld	hl, #_inv_fire_pause
 ;setupPair	HL
@@ -2183,11 +2184,11 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:186: boom_play = true;        
+;main.c:183: boom_play = true;        
 ;setupPair	HL
 	ld	hl, #_boom_play
 	ld	(hl), #0x01
-;main.c:187: blast_delay -= 1;
+;main.c:184: blast_delay -= 1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_blast_delay
@@ -2202,11 +2203,11 @@ _invader_hit::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:189: if (blast_delay < 0) {
+;main.c:186: if (blast_delay < 0) {
 ;setupPair	HL
 	bit	7, (hl)
 	ret	Z
-;main.c:190: blast_delay = 60;
+;main.c:187: blast_delay = 60;
 ;setupPair	HL
 	dec	hl
 ;setupPair	HL
@@ -2214,15 +2215,15 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:191: boom_play = false;
+;main.c:188: boom_play = false;
 ;setupPair	HL
 	ld	hl, #_boom_play
 	ld	(hl), #0x00
-;main.c:192: been_hit = false;
+;main.c:189: been_hit = false;
 ;setupPair	HL
 	ld	hl, #_been_hit
 	ld	(hl), #0x00
-;main.c:193: bx = 165; // move boom off screen (following invader)
+;main.c:190: bx = 165; // move boom off screen (following invader)
 ;setupPair	HL
 	ld	hl, #_bx
 ;setupPair	HL
@@ -2230,7 +2231,7 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:194: by = 144;
+;main.c:191: by = 144;
 ;setupPair	HL
 	ld	hl, #_by
 ;setupPair	HL
@@ -2238,15 +2239,26 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:197: invader_x = 85; // move invader back up after being hit        
-;setupPair	HL
-	ld	hl, #_invader_x
-;setupPair	HL
-	ld	a, #0x55
-	ld	(hl+), a
-	xor	a, a
-	ld	(hl), a
-;main.c:198: invader_y = 40; // move invader back up after being hit
+;main.c:192: invader_x = ((unsigned char)rand() % (140 - 24 + 1)) + 24; // move invader to random x position       
+	call	_rand
+	ld	a, e
+	ld	h, #0x75
+;	spillPairReg hl
+;	spillPairReg hl
+	push	hl
+	inc	sp
+	push	af
+	inc	sp
+	call	__moduchar
+	pop	hl
+	ld	d, #0x00
+	ld	hl, #0x0018
+	add	hl, de
+	ld	a, l
+	ld	(_invader_x), a
+	ld	a, h
+	ld	(_invader_x + 1), a
+;main.c:193: invader_y = 40; // move invader back up after being hit
 ;setupPair	HL
 	ld	hl, #_invader_y
 ;setupPair	HL
@@ -2254,23 +2266,23 @@ _invader_hit::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:201: }
+;main.c:196: }
 	ret
-;main.c:206: void main() {
+;main.c:201: void main() {
 ;	---------------------------------
 ; Function main
 ; ---------------------------------
 _main::
 	dec	sp
 	dec	sp
-;main.c:208: set_bkg_data(0, 66, title_data);
+;main.c:203: set_bkg_data(0, 66, title_data);
 	ld	de, #_title_data
 	push	de
 	ld	hl, #0x4200
 	push	hl
 	call	_set_bkg_data
 	add	sp, #4
-;main.c:209: set_bkg_tiles(0, 0, 20, 18, title_map);
+;main.c:204: set_bkg_tiles(0, 0, 20, 18, title_map);
 	ld	de, #_title_map
 	push	de
 	ld	hl, #0x1214
@@ -2280,45 +2292,45 @@ _main::
 	push	af
 	call	_set_bkg_tiles
 	add	sp, #6
-;main.c:210: SHOW_BKG;
+;main.c:205: SHOW_BKG;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x01
 	ldh	(_LCDC_REG + 0), a
-;main.c:211: DISPLAY_ON;
+;main.c:206: DISPLAY_ON;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x80
 	ldh	(_LCDC_REG + 0), a
-;main.c:212: waitpad(J_START); // check for Start to be pressed
+;main.c:207: waitpad(J_START); // check for Start to be pressed
 	ld	a, #0x80
 	push	af
 	inc	sp
 	call	_waitpad
 	inc	sp
-;main.c:217: font_init();
+;main.c:212: font_init();
 	call	_font_init
-;main.c:218: main_font = font_load(font_min);
+;main.c:213: main_font = font_load(font_min);
 	ld	de, #_font_min
 	push	de
 	call	_font_load
 	pop	hl
-;main.c:220: font_set(main_font);
+;main.c:215: font_set(main_font);
 	push	de
 	call	_font_set
 	pop	hl
-;main.c:224: NR52_REG = 0x80;    // $80 is 1000 0000 in binary and turns on sound
+;main.c:219: NR52_REG = 0x80;    // $80 is 1000 0000 in binary and turns on sound
 	ld	a, #0x80
 	ldh	(_NR52_REG + 0), a
-;main.c:225: NR50_REG = 0x77;    // $77 is 0111 0111 in binary and sets the volume for both left and right channel just set to max 0x77
+;main.c:220: NR50_REG = 0x77;    // $77 is 0111 0111 in binary and sets the volume for both left and right channel just set to max 0x77
 	ld	a, #0x77
 	ldh	(_NR50_REG + 0), a
-;main.c:226: NR51_REG = 0xFF;    // $FF is 1111 1111 in binary, select which chanels we want to use in this case all of them. 
+;main.c:221: NR51_REG = 0xFF;    // $FF is 1111 1111 in binary, select which chanels we want to use in this case all of them. 
 	ld	a, #0xff
 	ldh	(_NR51_REG + 0), a
-;main.c:232: SPRITES_8x16;
+;main.c:227: SPRITES_8x16;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x04
 	ldh	(_LCDC_REG + 0), a
-;main.c:237: set_sprite_data(0, 16, sprites_turret); // starting at zero, push four 8x8 tiles from turret array into sprite data
+;main.c:232: set_sprite_data(0, 16, sprites_turret); // starting at zero, push four 8x8 tiles from turret array into sprite data
 	ld	de, #_sprites_turret
 	push	de
 	ld	a, #0x10
@@ -2344,7 +2356,7 @@ _main::
 	ld	(hl), #0x0a
 	ld	hl, #(_shadow_OAM + 26)
 	ld	(hl), #0x0c
-;main.c:255: set_sprite_data(16, 16, sprites_invader);
+;main.c:250: set_sprite_data(16, 16, sprites_invader);
 	ld	de, #_sprites_invader
 	push	de
 	ld	a, #0x10
@@ -2370,23 +2382,23 @@ _main::
 	ld	(hl), #0x1a
 	ld	hl, #(_shadow_OAM + 58)
 	ld	(hl), #0x1c
-;main.c:272: SHOW_SPRITES;
+;main.c:267: SHOW_SPRITES;
 	ldh	a, (_LCDC_REG + 0)
 	or	a, #0x02
 	ldh	(_LCDC_REG + 0), a
-;main.c:277: while(1) {
+;main.c:272: while(1) {
 00156$:
-;main.c:279: if(game_over) {
+;main.c:274: if(game_over) {
 ;setupPair	HL
 	ld	hl, #_game_over
 	bit	0, (hl)
 	jp	Z, 00104$
-;main.c:281: gotoxy(1, 1);        
+;main.c:276: gotoxy(1, 1);        
 	ld	hl, #0x101
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:282: printf("SCORE %d ", score);
+;main.c:277: printf("SCORE %d ", score);
 ;setupPair	HL
 	ld	hl, #_score
 ;setupPair	HL
@@ -2398,12 +2410,12 @@ _main::
 	push	de
 	call	_printf
 	add	sp, #4
-;main.c:283: gotoxy(12, 1);
+;main.c:278: gotoxy(12, 1);
 	ld	hl, #0x10c
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:284: printf("LIVES %d ", lives);
+;main.c:279: printf("LIVES %d ", lives);
 ;setupPair	HL
 	ld	hl, #_lives
 ;setupPair	HL
@@ -2415,22 +2427,22 @@ _main::
 	push	de
 	call	_printf
 	add	sp, #4
-;main.c:285: gotoxy(5, 8);
+;main.c:280: gotoxy(5, 8);
 	ld	hl, #0x805
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:286: printf("GAME  OVER");
+;main.c:281: printf("GAME  OVER");
 	ld	de, #___str_2
 	push	de
 	call	_printf
 	pop	hl
-;main.c:290: if(joypad() & J_START) {                    
+;main.c:285: if(joypad() & J_START) {                    
 	call	_joypad
 	ld	a, e
 	rlca
 	jr	NC, 00104$
-;main.c:291: turret_x = 84;  // turret starting x
+;main.c:286: turret_x = 84;  // turret starting x
 ;setupPair	HL
 	ld	hl, #_turret_x
 ;setupPair	HL
@@ -2438,7 +2450,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:292: turret_y = 125; // turret starting y
+;main.c:287: turret_y = 125; // turret starting y
 ;setupPair	HL
 	ld	hl, #_turret_y
 ;setupPair	HL
@@ -2446,7 +2458,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:293: invader_x = 85; // invader starting x
+;main.c:288: invader_x = 85; // invader starting x
 ;setupPair	HL
 	ld	hl, #_invader_x
 ;setupPair	HL
@@ -2454,7 +2466,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:294: invader_y = 40; // invader starting y
+;main.c:289: invader_y = 40; // invader starting y
 ;setupPair	HL
 	ld	hl, #_invader_y
 ;setupPair	HL
@@ -2462,7 +2474,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:295: i_dir = 1;      // 1 = right, 0 = left
+;main.c:290: i_dir = 1;      // 1 = right, 0 = left
 ;setupPair	HL
 	ld	hl, #_i_dir
 ;setupPair	HL
@@ -2470,7 +2482,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:296: lives = 3; // reset lives
+;main.c:291: lives = 3; // reset lives
 ;setupPair	HL
 	ld	hl, #_lives
 ;setupPair	HL
@@ -2478,18 +2490,18 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:297: score = 0; // reset score
+;main.c:292: score = 0; // reset score
 	xor	a, a
 ;setupPair	HL
 	ld	hl, #_score
 ;setupPair	HL
 	ld	(hl+), a
 	ld	(hl), a
-;main.c:298: explosion_play = false; 
+;main.c:293: explosion_play = false; 
 ;setupPair	HL
 	ld	hl, #_explosion_play
 	ld	(hl), #0x00
-;main.c:299: turret_been_hit = false;  
+;main.c:294: turret_been_hit = false;  
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	ld	(hl), #0x00
@@ -2499,7 +2511,7 @@ _main::
 	ld	a, #0x28
 	ld	(hl+), a
 	ld	(hl), #0x55
-;main.c:301: move_sprite(9, invader_x + 8, invader_y);             
+;main.c:296: move_sprite(9, invader_x + 8, invader_y);             
 ;setupPair	HL
 	ld	hl, #_invader_y
 	ld	b, (hl)
@@ -2513,35 +2525,35 @@ _main::
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-;main.c:302: game_over = false; 
+;main.c:297: game_over = false; 
 ;setupPair	HL
 	ld	hl, #_game_over
 	ld	(hl), #0x00
-;main.c:303: gotoxy(5, 8);
+;main.c:298: gotoxy(5, 8);
 	ld	hl, #0x805
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:304: printf("          "); // removes "GAME OVER" text                                                             
+;main.c:299: printf("          "); // removes "GAME OVER" text                                                             
 	ld	de, #___str_3
 	push	de
 	call	_printf
 	pop	hl
 00104$:
-;main.c:310: if(!(game_over)){              
+;main.c:305: if(!(game_over)){              
 ;setupPair	HL
 	ld	hl, #_game_over
 	bit	0, (hl)
 	jp	NZ, 00156$
-;main.c:312: move_anim_inv(); 
+;main.c:307: move_anim_inv(); 
 	call	_move_anim_inv
-;main.c:315: invader_fire();      
+;main.c:310: invader_fire();      
 	call	_invader_fire
-;main.c:318: invader_hit(); 
+;main.c:313: invader_hit(); 
 	call	_invader_hit
-;main.c:321: turret_hit();
+;main.c:316: turret_hit();
 	call	_turret_hit
-;main.c:326: if(joypad() & J_RIGHT && !(turret_been_hit)) {            
+;main.c:321: if(joypad() & J_RIGHT && !(turret_been_hit)) {            
 	call	_joypad
 	ld	a, e
 	rrca
@@ -2550,7 +2562,7 @@ _main::
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
 	jr	NZ, 00108$
-;main.c:327: if(turret_x < 142) {
+;main.c:322: if(turret_x < 142) {
 ;setupPair	HL
 	ld	hl, #_turret_x
 	ld	a, (hl+)
@@ -2571,7 +2583,7 @@ _main::
 	scf
 00345$:
 	jr	NC, 00108$
-;main.c:328: turret_x += 1; 
+;main.c:323: turret_x += 1; 
 ;setupPair	HL
 	ld	hl, #_turret_x
 	inc	(hl)
@@ -2581,7 +2593,7 @@ _main::
 	inc	(hl)
 00346$:
 00108$:
-;main.c:332: if(joypad() & J_LEFT && !(turret_been_hit)) {            
+;main.c:327: if(joypad() & J_LEFT && !(turret_been_hit)) {            
 	call	_joypad
 	bit	1, e
 	jr	Z, 00113$
@@ -2589,7 +2601,7 @@ _main::
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
 	jr	NZ, 00113$
-;main.c:333: if(turret_x > 21) {
+;main.c:328: if(turret_x > 21) {
 ;setupPair	HL
 	ld	hl, #_turret_x
 	ld	a, #0x15
@@ -2611,7 +2623,7 @@ _main::
 	scf
 00349$:
 	jr	NC, 00113$
-;main.c:334: turret_x -= 1; 
+;main.c:329: turret_x -= 1; 
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_turret_x
@@ -2627,7 +2639,7 @@ _main::
 	ld	(hl+), a
 	ld	(hl), d
 00113$:
-;main.c:338: if(joypad() & J_A && !(been_pressed) && !(shot_fired) && !(turret_been_hit)) {                 
+;main.c:333: if(joypad() & J_A && !(been_pressed) && !(shot_fired) && !(turret_been_hit)) {                 
 	call	_joypad
 	bit	4, e
 	jr	Z, 00116$
@@ -2643,27 +2655,27 @@ _main::
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
 	jr	NZ, 00116$
-;main.c:340: NR41_REG = 0x07;  
+;main.c:335: NR41_REG = 0x07;  
 	ld	a, #0x07
 	ldh	(_NR41_REG + 0), a
-;main.c:341: NR42_REG = 0x72; 
+;main.c:336: NR42_REG = 0x72; 
 	ld	a, #0x72
 	ldh	(_NR42_REG + 0), a
-;main.c:342: NR43_REG = 0x21;  
+;main.c:337: NR43_REG = 0x21;  
 	ld	a, #0x21
 	ldh	(_NR43_REG + 0), a
-;main.c:343: NR44_REG = 0xC0;  
+;main.c:338: NR44_REG = 0xC0;  
 	ld	a, #0xc0
 	ldh	(_NR44_REG + 0), a
-;main.c:345: been_pressed = true;
+;main.c:340: been_pressed = true;
 ;setupPair	HL
 	ld	hl, #_been_pressed
 	ld	(hl), #0x01
-;main.c:346: shot_fired = true;               
+;main.c:341: shot_fired = true;               
 ;setupPair	HL
 	ld	hl, #_shot_fired
 	ld	(hl), #0x01
-;main.c:347: sx=turret_x;
+;main.c:342: sx=turret_x;
 ;setupPair	HL
 	ld	a, (#_turret_x)
 ;setupPair	HL
@@ -2672,7 +2684,7 @@ _main::
 	ld	a, (#_turret_x + 1)
 ;setupPair	HL
 	ld	(#_sx + 1),a
-;main.c:348: sy=turret_y + 6;
+;main.c:343: sy=turret_y + 6;
 ;setupPair	HL
 	ld	a, (#_turret_y)
 	add	a, #0x06
@@ -2684,21 +2696,21 @@ _main::
 ;setupPair	HL
 	ld	(#_sy + 1),a
 00116$:
-;main.c:350: if(!(joypad() & J_A)) {
+;main.c:345: if(!(joypad() & J_A)) {
 	call	_joypad
 	bit	4, e
 	jr	NZ, 00121$
-;main.c:351: been_pressed = false; // fixes autofire, also with line below...
+;main.c:346: been_pressed = false; // fixes autofire, also with line below...
 ;setupPair	HL
 	ld	hl, #_been_pressed
 	ld	(hl), #0x00
 00121$:
-;main.c:356: if (shot_fired) {
+;main.c:351: if (shot_fired) {
 ;setupPair	HL
 	ld	hl, #_shot_fired
 	bit	0, (hl)
 	jr	Z, 00127$
-;main.c:357: sy -= 3;             
+;main.c:352: sy -= 3;             
 ;setupPair	HL
 	ld	hl, #_sy
 	ld	a, (hl)
@@ -2709,7 +2721,7 @@ _main::
 	ld	a, (hl)
 	adc	a, #0xff
 ;setupPair	HL
-;main.c:359: if (sy < 41) {                    
+;main.c:354: if (sy < 41) {                    
 ;setupPair	HL
 	ld	(hl-), a
 	ld	a, (hl+)
@@ -2730,17 +2742,17 @@ _main::
 	scf
 00354$:
 	jr	NC, 00127$
-;main.c:360: if(!(been_pressed)) { // ...here!
+;main.c:355: if(!(been_pressed)) { // ...here!
 ;setupPair	HL
 	ld	hl, #_been_pressed
 	bit	0, (hl)
 	jr	NZ, 00123$
-;main.c:361: shot_fired = false;
+;main.c:356: shot_fired = false;
 ;setupPair	HL
 	ld	hl, #_shot_fired
 	ld	(hl), #0x00
 00123$:
-;main.c:363: sx = 165;
+;main.c:358: sx = 165;
 ;setupPair	HL
 	ld	hl, #_sx
 ;setupPair	HL
@@ -2748,7 +2760,7 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:364: sy = 0;
+;main.c:359: sy = 0;
 	xor	a, a
 ;setupPair	HL
 	ld	hl, #_sy
@@ -2756,7 +2768,7 @@ _main::
 	ld	(hl+), a
 	ld	(hl), a
 00127$:
-;main.c:371: ) {
+;main.c:366: ) {
 ;setupPair	HL
 	ld	hl, #_inv_shot_y
 	ld	a, #0x83
@@ -2778,11 +2790,11 @@ _main::
 	scf
 00356$:
 	jr	NC, 00129$
-;main.c:372: inv_fired = false;
+;main.c:367: inv_fired = false;
 ;setupPair	HL
 	ld	hl, #_inv_fired
 	ld	(hl), #0x00
-;main.c:373: inv_shot_x = invader_x;
+;main.c:368: inv_shot_x = invader_x;
 ;setupPair	HL
 	ld	a, (#_invader_x)
 ;setupPair	HL
@@ -2791,7 +2803,7 @@ _main::
 	ld	a, (#_invader_x + 1)
 ;setupPair	HL
 	ld	(#_inv_shot_x + 1),a
-;main.c:374: inv_shot_y = invader_y;
+;main.c:369: inv_shot_y = invader_y;
 ;setupPair	HL
 	ld	a, (#_invader_y)
 ;setupPair	HL
@@ -2800,7 +2812,7 @@ _main::
 	ld	a, (#_invader_y + 1)
 ;setupPair	HL
 	ld	(#_inv_shot_y + 1),a
-;main.c:375: inv_fire_pause = 90;
+;main.c:370: inv_fire_pause = 90;
 ;setupPair	HL
 	ld	hl, #_inv_fire_pause
 ;setupPair	HL
@@ -2809,7 +2821,7 @@ _main::
 	xor	a, a
 	ld	(hl), a
 00129$:
-;main.c:380: if ((sx + 6 >= invader_x) && (sx + 6 <= invader_x + 10) && (sy + 4 <= invader_y + 8)) {
+;main.c:375: if ((sx + 6 >= invader_x) && (sx + 6 <= invader_x + 10) && (sy + 4 <= invader_y + 8)) {
 ;setupPair	HL
 	ld	hl, #_sx
 ;setupPair	HL
@@ -2911,7 +2923,7 @@ _main::
 	scf
 00362$:
 	jr	C, 00131$
-;main.c:381: sx = 165;
+;main.c:376: sx = 165;
 ;setupPair	HL
 	ld	hl, #_sx
 ;setupPair	HL
@@ -2919,18 +2931,18 @@ _main::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;main.c:382: sy = 0;
+;main.c:377: sy = 0;
 	xor	a, a
 ;setupPair	HL
 	ld	hl, #_sy
 ;setupPair	HL
 	ld	(hl+), a
 	ld	(hl), a
-;main.c:383: been_hit = true;
+;main.c:378: been_hit = true;
 ;setupPair	HL
 	ld	hl, #_been_hit
 	ld	(hl), #0x01
-;main.c:384: score += 10; 
+;main.c:379: score += 10; 
 ;setupPair	HL
 	ld	hl, #_score
 	ld	a, (hl)
@@ -2943,7 +2955,7 @@ _main::
 ;setupPair	HL
 	ld	(hl), a
 00131$:
-;main.c:389: if ((inv_shot_x + 6) >= (turret_x) && (inv_shot_x + 4) <= (turret_x + 12) && (inv_shot_y + 6) >= (turret_y + 9)) {
+;main.c:384: if ((inv_shot_x + 6) >= (turret_x) && (inv_shot_x + 4) <= (turret_x + 12) && (inv_shot_y + 6) >= (turret_y + 9)) {
 ;setupPair	HL
 	ld	hl, #_inv_shot_x
 ;setupPair	HL
@@ -3054,12 +3066,12 @@ _main::
 	scf
 00368$:
 	jr	C, 00139$
-;main.c:390: if (!(turret_been_hit)) {
+;main.c:385: if (!(turret_been_hit)) {
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
 	jr	NZ, 00139$
-;main.c:391: lives -= 1;
+;main.c:386: lives -= 1;
 ;setupPair	HL
 ;setupPair	HL
 	ld	hl, #_lives
@@ -3074,40 +3086,40 @@ _main::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;main.c:393: if (lives == 0) {  
+;main.c:388: if (lives == 0) {  
 ;setupPair	HL
 ;setupPair	HL
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	NZ, 00135$
-;main.c:395: NR41_REG = 0x09;  
+;main.c:390: NR41_REG = 0x09;  
 	ld	a, #0x09
 	ldh	(_NR41_REG + 0), a
-;main.c:396: NR42_REG = 0xF1; 
+;main.c:391: NR42_REG = 0xF1; 
 	ld	a, #0xf1
 	ldh	(_NR42_REG + 0), a
-;main.c:397: NR43_REG = 0x81;  
+;main.c:392: NR43_REG = 0x81;  
 	ld	a, #0x81
 	ldh	(_NR43_REG + 0), a
-;main.c:398: NR44_REG = 0xC0;  
+;main.c:393: NR44_REG = 0xC0;  
 	ld	a, #0xc0
 	ldh	(_NR44_REG + 0), a
-;main.c:400: game_over = true;                                                  
+;main.c:395: game_over = true;                                                  
 ;setupPair	HL
 	ld	hl, #_game_over
 	ld	(hl), #0x01
 00135$:
-;main.c:402: turret_been_hit = true;            
+;main.c:397: turret_been_hit = true;            
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	ld	(hl), #0x01
 00139$:
-;main.c:409: if (inv_fired) {
+;main.c:404: if (inv_fired) {
 ;setupPair	HL
 	ld	hl, #_inv_fired
 	bit	0, (hl)
 	jr	Z, 00143$
-;main.c:411: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
+;main.c:406: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
 ;setupPair	HL
 	ld	hl, #_inv_shot_y
 	ld	b, (hl)
@@ -3120,7 +3132,7 @@ _main::
 	ld	a, b
 	ld	(hl+), a
 	ld	(hl), c
-;main.c:411: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
+;main.c:406: move_sprite(14, inv_shot_x, inv_shot_y);    // draw sprite 14 to these coordinates                  
 	jr	00144$
 00143$:
 ;c:/gbdk/include/gb/gb.h:1247: OAM_item_t * itm = &shadow_OAM[nb];
@@ -3129,9 +3141,9 @@ _main::
 	ld	(hl), #0x90
 	inc	hl
 	ld	(hl), #0xa5
-;main.c:415: move_sprite(14, 165, 144);                  // draw sprite 14 to these coordinates                 
+;main.c:410: move_sprite(14, 165, 144);                  // draw sprite 14 to these coordinates                 
 00144$:
-;main.c:419: if (!(turret_been_hit)) {
+;main.c:414: if (!(turret_been_hit)) {
 ;setupPair	HL
 	ld	hl, #_turret_been_hit
 	bit	0, (hl)
@@ -3141,10 +3153,10 @@ _main::
 	ld	(hl), #0x00
 	ld	hl, #(_shadow_OAM + 6)
 	ld	(hl), #0x02
-;main.c:421: set_sprite_tile(1, 2);            
+;main.c:416: set_sprite_tile(1, 2);            
 	jr	00152$
 00151$:
-;main.c:426: if (turret_exp_frame == 1) {               
+;main.c:421: if (turret_exp_frame == 1) {               
 ;setupPair	HL
 	ld	hl, #_turret_exp_frame
 ;setupPair	HL
@@ -3157,10 +3169,10 @@ _main::
 	ld	(hl), #0x04
 	ld	hl, #(_shadow_OAM + 6)
 	ld	(hl), #0x06
-;main.c:428: set_sprite_tile(1, 6); 
+;main.c:423: set_sprite_tile(1, 6); 
 	jr	00152$
 00148$:
-;main.c:431: else if (turret_exp_frame == 2) {                
+;main.c:426: else if (turret_exp_frame == 2) {                
 ;setupPair	HL
 	ld	hl, #_turret_exp_frame
 ;setupPair	HL
@@ -3173,9 +3185,9 @@ _main::
 	ld	(hl), #0x08
 	ld	hl, #(_shadow_OAM + 6)
 	ld	(hl), #0x0a
-;main.c:433: set_sprite_tile(1, 10); 
+;main.c:428: set_sprite_tile(1, 10); 
 00152$:
-;main.c:436: move_sprite(0, turret_x, turret_y);     // draw sprite 0 to these coordinates
+;main.c:431: move_sprite(0, turret_x, turret_y);     // draw sprite 0 to these coordinates
 ;setupPair	HL
 	ld	hl, #_turret_y
 	ld	c, (hl)
@@ -3188,7 +3200,7 @@ _main::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:437: move_sprite(1, turret_x + 8, turret_y); // draw sprite 1 to these coordinates
+;main.c:432: move_sprite(1, turret_x + 8, turret_y); // draw sprite 1 to these coordinates
 ;setupPair	HL
 	ld	hl, #_turret_y
 	ld	c, (hl)
@@ -3202,7 +3214,7 @@ _main::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:440: move_sprite(6, sx, sy); // draw sprite 6 to these coordinates
+;main.c:435: move_sprite(6, sx, sy); // draw sprite 6 to these coordinates
 ;setupPair	HL
 	ld	hl, #_sy
 	ld	c, (hl)
@@ -3215,12 +3227,12 @@ _main::
 	ld	a, c
 	ld	(hl+), a
 	ld	(hl), b
-;main.c:444: gotoxy(1, 1);        
+;main.c:439: gotoxy(1, 1);        
 	ld	hl, #0x101
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:445: printf("SCORE %d ", score);
+;main.c:440: printf("SCORE %d ", score);
 ;setupPair	HL
 	ld	hl, #_score
 ;setupPair	HL
@@ -3232,12 +3244,12 @@ _main::
 	push	de
 	call	_printf
 	add	sp, #4
-;main.c:446: gotoxy(12, 1);
+;main.c:441: gotoxy(12, 1);
 	ld	hl, #0x10c
 	push	hl
 	call	_gotoxy
 	pop	hl
-;main.c:447: printf("LIVES %d ", lives);
+;main.c:442: printf("LIVES %d ", lives);
 ;setupPair	HL
 	ld	hl, #_lives
 ;setupPair	HL
@@ -3249,10 +3261,10 @@ _main::
 	push	de
 	call	_printf
 	add	sp, #4
-;main.c:452: wait_vbl_done(); // helps keep framerate
+;main.c:447: wait_vbl_done(); // helps keep framerate
 	call	_wait_vbl_done
 	jp	00156$
-;main.c:455: }
+;main.c:450: }
 	inc	sp
 	inc	sp
 	ret

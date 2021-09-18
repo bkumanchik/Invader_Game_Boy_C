@@ -1,5 +1,5 @@
 XL3
-H 9 areas 3F global symbols
+H 9 areas 3E global symbols
 M main
 O -mgbz80
 S _font_set Ref000000
@@ -34,8 +34,7 @@ S _title_map Def0005AD
 S _turret_hit Def000756
 S _invader_hit Def0007F3
 S _title_data Def00018D
-A _DATA size 2 flags 0 addr 0
-S _rand_x Def000000
+A _DATA size 0 flags 0 addr 0
 A _INITIALIZED size 232 flags 0 addr 0
 S _lives Def00022E
 S _shot_fired Def000204
@@ -74,10 +73,6 @@ A _GSINIT size 0 flags 0 addr 0
 A _GSFINAL size 0 flags 0 addr 0
 A _INITIALIZER size 232 flags 0 addr 0
 A _CABS size 0 flags 8 addr 0
-T 00 00 00
-R 00 00 01 00
-T 00 00 00
-R 00 00 01 00
 T 00 00 00
 R 00 00 02 00
 T 00 00 00

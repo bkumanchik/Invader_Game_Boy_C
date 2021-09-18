@@ -41,7 +41,6 @@ int i_anim_delay = 20; // invader animation (and move) delay
 int inv_frame = 1; // invader start animation frame
 int ix_speed = 2; // march speed
 int i_dir = 1; // 1 = right, 0 = left
-int rand_x; // random x for invader restart
 // shoot variables
 int inv_shot_x = 165; 
 int inv_shot_y = 144; 

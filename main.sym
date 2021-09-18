@@ -87,7 +87,6 @@ Symbol Table
   0 _move_anim_inv                                                 000000 GR
     _printf                                                        ****** GX
     _rand                                                          ****** GX
-  1 _rand_x                                                        000000 GR
   2 _score                                                         00022C GR
     _set_bkg_data                                                  ****** GX
     _set_bkg_tiles                                                 ****** GX
@@ -117,7 +116,7 @@ Hexadecimal [24-Bits]
 Area Table
 
    0 _CODE                                      size    DA8   flags    0
-   1 _DATA                                      size      2   flags    0
+   1 _DATA                                      size      0   flags    0
    2 _INITIALIZED                               size    232   flags    0
    3 _DABS                                      size      0   flags    8
    4 _HOME                                      size      0   flags    0
